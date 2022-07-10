@@ -11,36 +11,20 @@ readme = "README.md"
 repository = "https://www.github.com/Iron-E/clinvoice_finance"
 
 [dependencies]
-# Async
-futures = "0.3"
-
-# Archiving
-zip = "0.5"
-
-# CLInvoice
 clinvoice_error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_error"}
 
-# Currency
-rust_decimal = "1"
-
-# Date/Time
 chrono = "0.4"
-
-# Enums
-strum = {features = ["derive"], version = "0.24"}
-
-# Errors
-thiserror = "1"
-
-# Serialization
-serde = {optional=true, version="1"}
-
-# Web Requests
+futures = "0.3"
 reqwest = "0.11"
+rust_decimal = "1"
+serde = {optional = true, version = "1"}
+strum = {features = ["derive"], version = "0.24"}
+thiserror = "1"
+zip = "0.5"
 
 [dev-dependencies]
 pretty_assertions = "1"
-tokio = {features=["macros", "rt-multi-thread"], version="1"}
+tokio = {features = ["macros", "rt-multi-thread"], version = "1"}
 
 [features]
 default = []
