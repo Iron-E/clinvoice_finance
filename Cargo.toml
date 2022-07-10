@@ -1,0 +1,47 @@
+# See https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name = "clinvoice_finance"
+version = "0.3.0"
+authors = ["Iron-E <code.iron.e@gmail.com>"]
+description = "Structures for dealing with currencies and conversions between currencies for CLInvoice"
+
+edition = "2021"
+license = "GPL3"
+readme = "README.md"
+repository = "https://www.github.com/Iron-E/clinvoice_finance"
+
+[dependencies]
+# Async
+futures = "0.3"
+
+# Archiving
+zip = "0.5"
+
+# CLInvoice
+clinvoice_error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice_error"}
+
+# Currency
+rust_decimal = "1"
+
+# Date/Time
+chrono = "0.4"
+
+# Enums
+strum = {features = ["derive"], version = "0.24"}
+
+# Errors
+thiserror = "1"
+
+# Serialization
+serde = {optional=true, version="1"}
+
+# Web Requests
+reqwest = "0.11"
+
+[dev-dependencies]
+pretty_assertions = "1"
+tokio = {features=["macros", "rt-multi-thread"], version="1"}
+
+[features]
+default = []
+serde_support = ["rust_decimal/serde-str", "serde/derive"]
