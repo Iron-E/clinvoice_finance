@@ -6,21 +6,27 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum Error
 {
+	#[allow(missing_docs)]
 	#[error(transparent)]
 	Decimal(#[from] rust_decimal::Error),
 
+	#[allow(missing_docs)]
 	#[error("There was an error decoding the exchange rates CSV from the ECB: {0}")]
 	EcbCsvDecode(String),
 
+	#[allow(missing_docs)]
 	#[error(transparent)]
 	Io(#[from] io::Error),
 
+	#[allow(missing_docs)]
 	#[error(transparent)]
 	Reqwest(#[from] reqwest::Error),
 
+	#[allow(missing_docs)]
 	#[error("The {0} currency is not recognized by CLInvoice. Please see https://github.com/Iron-E/clinvoice/wiki/Usage for a list of supported currencies")]
 	UnsupportedCurrency(String),
 
+	#[allow(missing_docs)]
 	#[error(transparent)]
 	Zip(#[from] zip::result::ZipError),
 }
