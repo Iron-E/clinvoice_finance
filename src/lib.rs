@@ -6,6 +6,8 @@
 //!
 //! * `serde_support` adds support for the [`serde`] crate.
 
+#![warn(missing_docs)]
+
 mod currency;
 mod error;
 mod exchange_rates;
