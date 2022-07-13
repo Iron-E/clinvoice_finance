@@ -1,5 +1,6 @@
 mod display;
 mod exchangeable;
+mod from_str;
 
 use rust_decimal::Decimal;
 #[cfg(feature = "serde_support")]

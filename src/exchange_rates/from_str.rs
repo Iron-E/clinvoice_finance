@@ -12,15 +12,23 @@ impl FromStr for ExchangeRates
 
 	fn from_str(csv: &str) -> Result<Self>
 	{
+		fn new_error(column: &str) -> Error
+		{
+			Error::Decode(
+				"the exchange rates CSV from the ECB".into(),
+				format!("there was no {column} column"),
+			)
+		}
+
 		let (currencies, rates) = {
 			let mut columns_by_values = csv.split('\n').map(|line| line.split(", "));
 			(
 				columns_by_values
 					.next()
-					.ok_or_else(|| Error::EcbCsvDecode("there was no currency column".into()))?,
+					.ok_or_else(|| new_error("currency"))?,
 				columns_by_values
 					.next()
-					.ok_or_else(|| Error::EcbCsvDecode("there was no exchange rate column".into()))?,
+					.ok_or_else(|| new_error("exchange rate"))?,
 			)
 		};
 
