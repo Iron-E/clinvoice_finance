@@ -28,4 +28,4 @@ tokio = {features = ["macros", "rt-multi-thread"], version = "1"}
 
 [features]
 default = []
-serde_support = ["rust_decimal/serde-str", "serde/derive"]
+serde = ["rust_decimal/serde-str", "serde/derive"]
