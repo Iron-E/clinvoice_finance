@@ -83,36 +83,33 @@ impl ExchangeRates
 	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 	pub async fn new() -> Result<Self>
 	{
-		let filepath = Self::filepath();
-
-		// PERF: CLInvoice caches ECB data until `Self::filepath()` changes
-		let contents = if filepath.is_file()
+		match Self::filepath()
 		{
-			fs::read_to_string(&filepath)?
+			// PERF: CLInvoice caches ECB data until `Self::filepath()` changes
+			path if path.is_file() => fs::read_to_string(&path)?,
+			path =>
+			{
+				let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
+					.and_then(Response::bytes)
+					.map_ok(Cursor::new)
+					.await?;
+
+				let mut archive = ZipArchive::new(cursor)?;
+				let mut csv = archive.by_index(0)?;
+
+				let mut csv_contents = String::with_capacity(csv.size().try_into().unwrap());
+				csv.read_to_string(&mut csv_contents)?;
+
+				// cache the download for next time this method is called
+				debug_assert!(
+					!path.is_file(),
+					"attemped to initialize `ExchangeRates` cache at {path:?}, but it already exists"
+				);
+				fs::write(path, &csv_contents)?;
+
+				csv_contents
+			},
 		}
-		else
-		{
-			let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
-				.and_then(Response::bytes)
-				.map_ok(Cursor::new)
-				.await?;
-
-			let mut archive = ZipArchive::new(cursor)?;
-			let mut csv = archive.by_index(0)?;
-
-			let mut csv_contents = String::with_capacity(csv.size().try_into().unwrap());
-			csv.read_to_string(&mut csv_contents)?;
-
-			// cache the download for next time this method is called
-			debug_assert!(
-				!filepath.is_file(),
-				"attemped to initialize `ExchangeRates` cache at {filepath:?}, but it already exists"
-			);
-			fs::write(filepath, &csv_contents)?;
-
-			csv_contents
-		};
-
-		contents.parse()
+		.parse()
 	}
 }
