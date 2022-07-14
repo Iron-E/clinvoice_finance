@@ -3,7 +3,7 @@ mod exchangeable;
 mod from_str;
 
 use rust_decimal::Decimal;
-#[cfg(feature = "serde_support")]
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::Currency;
@@ -15,7 +15,7 @@ use crate::Currency;
 /// # See also
 ///
 /// * [`Money::new`], for how to create [`Money`] when an [amount](Decimal) does not already exist.
-#[cfg_attr(feature = "serde_support", derive(Deserialize, Serialize))]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Money
 {
