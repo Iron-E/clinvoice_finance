@@ -1,5 +1,6 @@
 mod display;
 mod from_str;
+mod try_from;
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};

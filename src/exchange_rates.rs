@@ -1,4 +1,5 @@
 mod from_str;
+mod try_from;
 
 use std::{
 	collections::HashMap,

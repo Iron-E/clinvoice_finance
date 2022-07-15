@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice-finance"
-version = "0.3.0"
+version = "0.4.2"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Structures for dealing with currencies and conversions between currencies for CLInvoice"
 
