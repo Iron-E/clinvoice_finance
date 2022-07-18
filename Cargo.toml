@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice-finance"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Structures for dealing with currencies and conversions between currencies for CLInvoice"
 
@@ -20,7 +20,7 @@ rust_decimal = "1"
 serde = {optional = true, version = "1"}
 strum = {features = ["derive"], version = "0.24"}
 thiserror = "1"
-zip = "0.5"
+zip = "0.6"
 
 [dev-dependencies]
 pretty_assertions = "1"
