@@ -20,17 +20,14 @@ impl FromStr for ExchangeRates
 			)
 		}
 
-		let (currencies, rates) = {
-			let mut columns_by_values = csv.split('\n').map(|line| line.split(", "));
-			(
-				columns_by_values
-					.next()
-					.ok_or_else(|| new_error("currency"))?,
-				columns_by_values
-					.next()
-					.ok_or_else(|| new_error("exchange rate"))?,
-			)
-		};
+		// {{{
+		let mut columns_by_values = csv.split('\n').map(|line| line.split(", "));
+
+		#[rustfmt::skip] let currencies = columns_by_values.next().ok_or_else(|| new_error("currency"))?;
+		#[rustfmt::skip] let rates = columns_by_values.next().ok_or_else(|| new_error("exchange rate"))?;
+
+		drop(columns_by_values);
+		// }}}
 
 		let mut map = HashMap::with_capacity(Currency::COUNT);
 		map.insert(Default::default(), 1.into());
