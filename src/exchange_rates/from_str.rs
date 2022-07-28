@@ -21,7 +21,7 @@ impl FromStr for ExchangeRates
 		}
 
 		// {{{
-		let mut columns_by_values = csv.split('\n').map(|line| line.split(", "));
+		let mut columns_by_values = csv.lines().map(|line| line.split(", "));
 
 		#[rustfmt::skip] let currencies = columns_by_values.next().ok_or_else(|| new_error("currency"))?;
 		#[rustfmt::skip] let rates = columns_by_values.next().ok_or_else(|| new_error("exchange rate"))?;
