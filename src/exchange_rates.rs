@@ -3,7 +3,6 @@ mod try_from;
 
 use std::{
 	collections::HashMap,
-	convert::TryInto,
 	env,
 	fs,
 	io::{Cursor, Read},

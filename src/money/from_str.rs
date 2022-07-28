@@ -22,6 +22,7 @@ impl FromStr for Money
 		let amount = split.next().ok_or_else(|| new_error("amount"))?;
 		let currency = split.next().ok_or_else(|| new_error("currency"))?;
 
+		#[allow(clippy::drop_non_drop)]
 		drop(split);
 		// }}}
 
