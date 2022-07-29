@@ -4,7 +4,7 @@ use super::Currency;
 
 impl TryFrom<&str> for Currency
 {
-	type Error = <Currency as FromStr>::Err;
+	type Error = <Self as FromStr>::Err;
 
 	fn try_from(s: &str) -> Result<Self, Self::Error>
 	{

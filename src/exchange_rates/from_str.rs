@@ -1,4 +1,5 @@
-use std::{collections::HashMap, str::FromStr};
+use core::str::FromStr;
+use std::collections::HashMap;
 
 use rust_decimal::Decimal;
 use strum::EnumCount;
@@ -41,7 +42,7 @@ impl FromStr for ExchangeRates
 				map.insert(currency, r.parse::<Decimal>()?);
 				Ok(())
 			})
-			.and(Ok(ExchangeRates(map)))
+			.and(Ok(Self(map)))
 	}
 }
 

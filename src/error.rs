@@ -1,8 +1,10 @@
+#![allow(clippy::std_instead_of_core)]
+
 use std::io;
 
 use thiserror::Error;
 
-/// An [`Error`](std::error::Error) type for the library.
+/// An [`Error`](core::error::Error) type for the library.
 #[derive(Debug, Error)]
 pub enum Error
 {

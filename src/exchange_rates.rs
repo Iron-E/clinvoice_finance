@@ -1,12 +1,12 @@
 mod from_str;
 mod try_from;
 
+use core::ops::Range;
 use std::{
 	collections::HashMap,
 	env,
 	fs,
 	io::{Cursor, Read},
-	ops::Range,
 	path::PathBuf,
 };
 
