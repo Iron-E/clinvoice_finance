@@ -1,10 +1,11 @@
 #![allow(clippy::std_instead_of_core)]
 
+use core::result::Result as StdResult;
 use std::io;
 
 use thiserror::Error;
 
-/// An [`Error`](core::error::Error) type for the library.
+/// An [`Error`](core::error::Error) for the crate.
 #[derive(Debug, Error)]
 pub enum Error
 {
@@ -33,4 +34,5 @@ pub enum Error
 	Zip(#[from] zip::result::ZipError),
 }
 
-clinvoice_error::AliasResult!();
+/// A [`Result`](StdResult) for the crate.
+pub type Result<T> = StdResult<T, Error>;

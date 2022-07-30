@@ -1,7 +1,7 @@
 # See https://doc.rust-lang.org/cargo/reference/manifest.html
 [package]
 name = "clinvoice-finance"
-version = "0.4.6"
+version = "0.4.7"
 authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "Structures for dealing with currencies and conversions between currencies for CLInvoice"
 
@@ -11,8 +11,6 @@ readme = "README.md"
 repository = "https://www.github.com/Iron-E/clinvoice-finance"
 
 [dependencies]
-clinvoice-error = {branch = "release/0.3", git = "https://github.com/Iron-E/clinvoice-error"}
-
 chrono = "0.4"
 futures = "0.3"
 reqwest = "0.11"
