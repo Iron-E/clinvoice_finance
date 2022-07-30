@@ -10,6 +10,7 @@
 #![forbid(unsafe_code)]
 #![warn(
 	missing_docs,
+	clippy::cargo_common_metadata,
 	clippy::alloc_instead_of_core,
 	clippy::allow_attributes_without_reason,
 	clippy::as_underscore,
