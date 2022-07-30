@@ -1,4 +1,4 @@
-# CLInvoice Finance
+# `money`
 
 <!-- cargo-rdme start -->
 

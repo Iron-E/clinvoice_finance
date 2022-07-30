@@ -26,7 +26,7 @@ pub enum Error
 	Reqwest(#[from] reqwest::Error),
 
 	#[allow(missing_docs)]
-	#[error("The {0} currency is not recognized by CLInvoice. Please see https://github.com/Iron-E/clinvoice/wiki/Usage for a list of supported currencies")]
+	#[error("The {0} currency is not supported. See https://docs.rs/money2/latest/money2/type.Currency.html for a list of supported currencies")]
 	UnsupportedCurrency(String),
 
 	#[allow(missing_docs)]

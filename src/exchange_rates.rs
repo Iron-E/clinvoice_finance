@@ -85,7 +85,7 @@ impl ExchangeRates
 	{
 		match Self::filepath()
 		{
-			// PERF: CLInvoice caches ECB data until `Self::filepath()` changes
+			// PERF: `money2` caches ECB data until `Self::filepath()` changes
 			path if path.is_file() => fs::read_to_string(&path)?,
 			path =>
 			{
