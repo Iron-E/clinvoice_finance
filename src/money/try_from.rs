@@ -1,8 +1,8 @@
 use core::str::FromStr;
 
-use super::Currency;
+use super::Money;
 
-impl TryFrom<&str> for Currency
+impl TryFrom<&str> for Money
 {
 	type Error = <Self as FromStr>::Err;
 
