@@ -5,7 +5,7 @@ use crate::{Currency, ExchangeRates};
 /// the [rates](ExchangeRates) of conversion.
 pub trait Exchange
 {
-	/// The type which will be output by [`exchange`].
+	/// The type which will be output by [`exchange`](Exchange::exchange).
 	type Output;
 
 	/// Exchange some quantity into another `currency` using `rates`.
