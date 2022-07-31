@@ -8,7 +8,6 @@ name = "money2"
 version = "0.7.0"
 
 categories = ["asynchronous", "caching", "data-structures", "mathematics", "parser-implementations"]
-documentation = "https://docs.rs/money2"
 keywords = ["currency", "exchange", "finance", "iso-4217", "money"]
 license = "GPL-3.0-only"
 readme = "README.md"
