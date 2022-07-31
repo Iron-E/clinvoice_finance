@@ -19,15 +19,19 @@ impl FromStr for Money
 		// {{{
 		let mut split = s.split(' ');
 
-		let amount = split.next().ok_or_else(|| new_error("amount"))?;
-		let currency = split.next().ok_or_else(|| new_error("currency"))?;
+		let amount = {
+			let literal = split.next().ok_or_else(|| new_error("amount"))?;
+			literal.parse()?
+		};
+
+		let currency = split
+			.next()
+			.ok_or_else(|| new_error("currency"))
+			.and_then(str::parse)?;
 
 		drop(split);
 		// }}}
 
-		Ok(Self {
-			amount: amount.parse()?,
-			currency: currency.parse()?,
-		})
+		Ok(Self { amount, currency })
 	}
 }
