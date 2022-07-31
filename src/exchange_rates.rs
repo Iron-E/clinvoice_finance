@@ -18,14 +18,15 @@ use zip::ZipArchive;
 
 use crate::{Currency, Result};
 
-/// A collection of rates of exchange between currencies such that some `amount` of [`Money`]
-/// divided by its [`Currency`] will yield [`Currency::Eur`], and an `amount` of [`Currency::Eur`]
-/// multiplied by any [`Currency`]'s exchange rate will yield that [`Currency`].
+/// A collection of rates of exchange between currencies such that some `amount` of
+/// [`Money`](crate::Money) divided by its [`Currency`] will yield [`Currency::Eur`], and an
+/// `amount` of [`Currency::Eur`] multiplied by any [`Currency`]'s exchange rate will yield that
+/// [`Currency`].
 ///
 /// # See also
 ///
 /// * [`ExchangeRates::get`], to get the corresponding rate for some [`Currency`].
-/// * [`ExchangeRates::new`], to create new [`ExchangeRate`]s.
+/// * [`ExchangeRates::new`], to create new [`ExchangeRates`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ExchangeRates(HashMap<Currency, Decimal>);
 
