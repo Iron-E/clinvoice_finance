@@ -1,11 +1,11 @@
 use super::Money;
-use crate::{Currency, ExchangeRates, Exchange};
+use crate::{Currency, Exchange, ExchangeRates};
 
 impl Exchange for Money
 {
 	type Output = Self;
 
-	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
 	{
 		// noop for same currency
 		if self.currency == currency
@@ -15,7 +15,7 @@ impl Exchange for Money
 
 		let mut exchanged = self.amount * rates.index(&self.currency..&currency);
 		exchanged.rescale(2);
-		Self {
+		Self::Output {
 			amount: exchanged,
 			currency,
 		}

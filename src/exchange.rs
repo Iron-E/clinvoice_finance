@@ -19,7 +19,7 @@ where
 {
 	type Output = Self;
 
-	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
 	{
 		self
 			.into_iter()

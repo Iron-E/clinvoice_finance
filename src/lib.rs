@@ -74,14 +74,14 @@
 
 mod currency;
 mod error;
-mod exchange_rates;
 mod exchange;
+mod exchange_rates;
 mod money;
 
 pub use currency::Currency;
 pub use error::{Error, Result};
-pub use exchange_rates::ExchangeRates;
 pub use exchange::Exchange;
+pub use exchange_rates::ExchangeRates;
 pub use money::Money;
 pub use rust_decimal::Decimal;
 
