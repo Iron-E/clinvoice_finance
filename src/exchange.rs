@@ -28,10 +28,10 @@ where
 	}
 }
 
-impl<T> Exchange for &[T]
+impl<'any, T> Exchange for &'any [T]
 where
-	for<'any> &'any T: Exchange,
-	for<'any> Vec<T>: FromIterator<<&'any T as Exchange>::Output>,
+	&'any T: Exchange,
+	Vec<T>: FromIterator<<&'any T as Exchange>::Output>,
 {
 	type Output = Vec<T>;
 
