@@ -4,11 +4,12 @@
 //!
 //! # Features
 //!
-//! * `serde` adds support for the [`serde`] crate.
+//! * `serde` adds support for the [serde][serde-rs] crate.
 //!
 //! [currency]: https://docs.rs/money2/latest/money2/enum.Currency.html
 //! [money]: https://docs.rs/money2/latest/money2/struct.Money.html
 //! [rates]: https://docs.rs/money2/latest/money2/struct.ExchangeRates.html
+//! [serde-rs]: https://serde.rs
 
 #![allow(clippy::drop_non_drop)]
 #![forbid(unsafe_code)]
