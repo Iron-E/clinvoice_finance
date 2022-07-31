@@ -8,7 +8,7 @@
 //!
 //! # Re-exports
 //!
-//! * [`rust_decimal::Decimal`][decimal]
+//! * [`rust_decimal::Decimal`][decimal], because it is required to create [`Money`][money].
 //!
 //! [currency]: https://docs.rs/money2/latest/money2/enum.Currency.html
 //! [decimal]: https://docs.rs/rust_decimal/latest/rust_decimal/struct.Decimal.html
