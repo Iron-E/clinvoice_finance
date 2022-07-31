@@ -10,10 +10,10 @@ impl FromStr for Money
 	fn from_str(s: &str) -> Result<Self>
 	{
 		let new_error = |field: &str| -> Error {
-			Error::Decode(
-				format!(r#""{s}" into money"#),
-				format!("there was no {field}"),
-			)
+			Error::Decode {
+				context: format!(r#""{s}" into money"#),
+				reason: format!("there was no {field}"),
+			}
 		};
 
 		// {{{

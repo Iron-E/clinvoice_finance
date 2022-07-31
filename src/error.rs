@@ -14,8 +14,11 @@ pub enum Error
 	Decimal(#[from] rust_decimal::Error),
 
 	#[allow(missing_docs)]
-	#[error("There was an error decoding {0}: {1}")]
-	Decode(String, String),
+	#[error("There was an error decoding {context}: {reason}")]
+	Decode
+	{
+		context: String, reason: String
+	},
 
 	#[allow(missing_docs)]
 	#[error(transparent)]

@@ -15,10 +15,10 @@ impl FromStr for ExchangeRates
 	{
 		fn new_error(column: &str) -> Error
 		{
-			Error::Decode(
-				"the exchange rates CSV from the ECB".into(),
-				format!("there was no {column} column"),
-			)
+			Error::Decode {
+				context: "the exchange rates CSV from the ECB".into(),
+				reason: format!("there was no {column} column"),
+			}
 		}
 
 		// {{{
