@@ -92,8 +92,8 @@ impl ExchangeRates
 			{
 				let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
 					.and_then(Response::bytes)
-					.map_ok(Cursor::new)
-					.await?;
+					.await
+					.map(Cursor::new)?;
 
 				let mut archive = ZipArchive::new(cursor)?;
 				let mut csv = archive.by_index(0)?;
