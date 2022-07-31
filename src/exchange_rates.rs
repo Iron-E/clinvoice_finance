@@ -46,14 +46,15 @@ impl ExchangeRates
 		))
 	}
 
-	/// Retrieve the exchange rate for the `currency` provided, such that any [`Decimal`]
+	/// Retrieve a rate of exchange such that any [`Decimal`] in the `current` [`Currency`]
 	/// [multiplied by](std::ops::Mul) the return value will convert it to the `desired`
 	/// [`Currency`].
 	///
 	/// # Returns
 	///
 	/// * [`None`] if this set of exchange rates does not account for the `currency`.
-	/// * [`Some`] if this set of exchange rates accounts for the `currency`.
+	/// * [`Some`] if this set of exchange rates accounts for both the `current` and `desired`
+	///   [`Currency`].
 	pub fn get(&self, current: &Currency, desired: &Currency) -> Option<Decimal>
 	{
 		self
@@ -67,7 +68,7 @@ impl ExchangeRates
 	///
 	/// # Panics
 	///
-	/// * If any `Currency` in `range` is not present in this set of [`ExchangeRates`].
+	/// * If any [`Currency`] in `range` is not present in this set of [`ExchangeRates`].
 	pub fn index(&self, range: Range<&Currency>) -> Decimal
 	{
 		self.get(range.start, range.end).unwrap_or_else(|| {

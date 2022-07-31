@@ -5,6 +5,11 @@ impl Exchange for Money
 {
 	type Output = Self;
 
+	/// The result will be [rounded](rust_decimal::Decimal::rescale) to two decimal places.
+	///
+	/// # See
+	///
+	/// * [`Exchange::exchange`]
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
 	{
 		// noop for same currency
