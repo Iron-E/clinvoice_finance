@@ -8,7 +8,12 @@ This crate provides functionality for [storing][money] and [exchanging][rates] v
 
 * `serde` adds support for the [serde][serde-rs] crate.
 
+## Re-exports
+
+* [`rust_decimal::Decimal`][decimal], because it is required to create [`Money`][money].
+
 [currency]: https://docs.rs/money2/latest/money2/enum.Currency.html
+[decimal]: https://docs.rs/rust_decimal/latest/rust_decimal/struct.Decimal.html
 [money]: https://docs.rs/money2/latest/money2/struct.Money.html
 [rates]: https://docs.rs/money2/latest/money2/struct.ExchangeRates.html
 [serde-rs]: https://serde.rs
