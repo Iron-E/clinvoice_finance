@@ -1,5 +1,5 @@
 mod display;
-mod exchangeable;
+mod exchange;
 mod from_str;
 mod try_from;
 
@@ -34,7 +34,7 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// use clinvoice_finance::{Currency, Decimal, Money};
+	/// use money2::{Currency, Decimal, Money};
 	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(

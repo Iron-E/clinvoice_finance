@@ -1,8 +1,10 @@
 use super::Money;
-use crate::{Currency, ExchangeRates, Exchangeable};
+use crate::{Currency, ExchangeRates, Exchange};
 
-impl Exchangeable for Money
+impl Exchange for Money
 {
+	type Output = Self;
+
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	{
 		// noop for same currency
@@ -18,10 +20,15 @@ impl Exchangeable for Money
 			currency,
 		}
 	}
+}
 
-	fn exchange_ref(&self, currency: Currency, rates: &ExchangeRates) -> Self
+impl Exchange for &Money
+{
+	type Output = Money;
+
+	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
 	{
-		Self::exchange(*self, currency, rates)
+		(*self).exchange(currency, rates)
 	}
 }
 
@@ -31,7 +38,7 @@ mod tests
 	use pretty_assertions::assert_eq;
 
 	use super::{Currency, ExchangeRates, Money};
-	use crate::{Exchangeable, SAMPLE_EXCHANGE_RATES_CSV};
+	use crate::{Exchange, SAMPLE_EXCHANGE_RATES_CSV};
 
 	#[test]
 	fn exchange()

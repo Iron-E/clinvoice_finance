@@ -75,13 +75,13 @@
 mod currency;
 mod error;
 mod exchange_rates;
-mod exchangeable;
+mod exchange;
 mod money;
 
 pub use currency::Currency;
 pub use error::{Error, Result};
 pub use exchange_rates::ExchangeRates;
-pub use exchangeable::Exchangeable;
+pub use exchange::Exchange;
 pub use money::Money;
 pub use rust_decimal::Decimal;
 
