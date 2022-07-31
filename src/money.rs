@@ -37,9 +37,11 @@ impl Money
 	/// use money2::{Currency, Decimal, Money};
 	/// # use pretty_assertions::assert_eq;
 	///
+	/// let literal = "20.00 USD";
 	/// let money = Money::new(20_00, 2, Currency::Usd);
-	/// assert_eq!(Money::try_from("20.00 USD").unwrap(), money);
-	/// assert_eq!(money.to_string(), "20.00 USD");
+	///
+	/// assert_eq!(Money::try_from(literal).unwrap(), money);
+	/// assert_eq!(money.to_string(), literal);
 	/// ```
 	pub fn new(amount: i64, decimal_places: u32, currency: Currency) -> Self
 	{
