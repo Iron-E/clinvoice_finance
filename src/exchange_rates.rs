@@ -38,7 +38,7 @@ impl ExchangeRates
 	{
 		let today = Local::now();
 		env::temp_dir().join(format!(
-			"clinvoice-finance--{}-{}-{}.csv",
+			"money2--{}-{}-{}.csv",
 			today.year(),
 			today.month(),
 			today.day()
