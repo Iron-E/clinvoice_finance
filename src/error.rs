@@ -40,7 +40,7 @@ pub enum Error
 	#[error(transparent)]
 	Reqwest(#[from] reqwest::Error),
 
-	/// A value had no equivalent [`Currency`] variant.
+	/// A value had no equivalent [`Currency`](crate::Currency) variant.
 	///
 	/// # Examples
 	///
