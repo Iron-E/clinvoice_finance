@@ -51,9 +51,9 @@ impl ExchangeRates
 	///
 	/// # Returns
 	///
-	/// * [`None`] if this set of exchange rates does not account for the `currency`.
 	/// * [`Some`] if this set of exchange rates accounts for both the `current` and `desired`
 	///   [`Currency`].
+	/// * [`None`] otherwise.
 	pub fn get(&self, current: &Currency, desired: &Currency) -> Option<Decimal>
 	{
 		self

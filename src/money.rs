@@ -10,7 +10,7 @@ use crate::{Currency, Decimal};
 
 /// An `amount` of [`Currency`].
 ///
-/// To find out how much the `amount` would be in another [`Currency`], use [`exchange`](crate::Exchangeable::exchange).
+/// To find out how much the `amount` would be in another [`Currency`], use [`exchange`](crate::Exchange::exchange).
 ///
 /// # See also
 ///
