@@ -5,7 +5,7 @@ authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "For storing and asynchronously converting between (a subset of) ISO-4217 currencies"
 edition = "2021"
 name = "money2"
-version = "0.7.1"
+version = "0.7.2"
 
 categories = ["asynchronous", "caching", "data-structures", "mathematics", "parser-implementations"]
 documentation = "https://docs.rs/money2"

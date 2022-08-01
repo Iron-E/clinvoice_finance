@@ -87,7 +87,8 @@ impl ExchangeRates
 		match Self::filepath()
 		{
 			// PERF: `money2` caches ECB data until `Self::filepath()` changes
-			path if path.is_file() => fs::read_to_string(&path)?,
+			// TODO: use `try_exists` after rust-lang/rust#83186
+			path if path.exists() => fs::read_to_string(&path)?,
 			path =>
 			{
 				let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
@@ -106,15 +107,35 @@ impl ExchangeRates
 				csv.read_to_string(&mut csv_contents)?;
 
 				// cache the download for next time this method is called
-				debug_assert!(
-					!path.is_file(),
-					"attemped to initialize `ExchangeRates` cache at {path:?}, but it already exists"
-				);
 				fs::write(path, &csv_contents)?;
 
 				csv_contents
 			},
 		}
 		.parse()
+	}
+}
+
+#[cfg(test)]
+mod tests
+{
+	use std::fs;
+
+	use super::ExchangeRates;
+
+	#[tokio::test]
+	async fn new()
+	{
+		{
+			let filepath = ExchangeRates::filepath();
+			if filepath.exists()
+			{
+				fs::remove_file(&filepath).unwrap();
+			}
+		}
+
+		let downloaded = ExchangeRates::new().await.unwrap();
+		let cached = ExchangeRates::new().await.unwrap();
+		assert_eq!(downloaded, cached);
 	}
 }
