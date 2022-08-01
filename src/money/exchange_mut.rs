@@ -1,39 +1,26 @@
 use super::Money;
-use crate::{Currency, Exchange, ExchangeRates};
+use crate::{Currency, ExchangeMut, ExchangeRates};
 
-impl Exchange for Money
+impl ExchangeMut for Money
 {
-	type Output = Self;
-
 	/// The result will be [rounded](crate::Decimal::rescale) to two decimal places.
 	///
 	/// # See
 	///
 	/// * [`Exchange::exchange`]
-	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
+	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates)
 	{
 		// noop for same currency
 		if self.currency == currency
 		{
-			return self;
+			return;
 		}
 
 		let mut exchanged = self.amount * rates.index(&self.currency..&currency);
 		exchanged.rescale(2);
-		Self::Output {
-			amount: exchanged,
-			currency,
-		}
-	}
-}
 
-impl Exchange for &Money
-{
-	type Output = Money;
-
-	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self::Output
-	{
-		(*self).exchange(currency, rates)
+		self.amount = exchanged;
+		self.currency = currency;
 	}
 }
 

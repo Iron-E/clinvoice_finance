@@ -1,5 +1,5 @@
 mod display;
-mod exchange;
+mod exchange_mut;
 mod from_str;
 mod try_from;
 
