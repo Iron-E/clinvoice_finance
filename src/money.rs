@@ -3,11 +3,10 @@ mod exchange;
 mod from_str;
 mod try_from;
 
-use rust_decimal::Decimal;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::Currency;
+use crate::{Currency, Decimal};
 
 /// An `amount` of [`Currency`].
 ///

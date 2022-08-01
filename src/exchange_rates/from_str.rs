@@ -1,11 +1,10 @@
 use core::str::FromStr;
 use std::collections::HashMap;
 
-use rust_decimal::Decimal;
 use strum::EnumCount;
 
 use super::ExchangeRates;
-use crate::{Currency, Error, Result};
+use crate::{Currency, Decimal, Error, Result};
 
 impl FromStr for ExchangeRates
 {
@@ -50,10 +49,9 @@ impl FromStr for ExchangeRates
 mod tests
 {
 	use pretty_assertions::assert_eq;
-	use rust_decimal::Decimal;
 
 	use super::ExchangeRates;
-	use crate::{Currency, SAMPLE_EXCHANGE_RATES_CSV};
+	use crate::{Currency, Decimal, SAMPLE_EXCHANGE_RATES_CSV};
 
 	#[tokio::test]
 	async fn new()

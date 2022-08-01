@@ -13,10 +13,9 @@ use std::{
 use chrono::{Datelike, Local};
 use futures::TryFutureExt;
 use reqwest::Response;
-use rust_decimal::Decimal;
 use zip::ZipArchive;
 
-use crate::{Currency, Result};
+use crate::{Currency, Decimal, Result};
 
 /// A collection of rates of exchange between currencies such that some `amount` of
 /// [`Money`](crate::Money) divided by its [`Currency`] will yield [`Currency::Eur`], and an

@@ -5,7 +5,7 @@ impl Exchange for Money
 {
 	type Output = Self;
 
-	/// The result will be [rounded](rust_decimal::Decimal::rescale) to two decimal places.
+	/// The result will be [rounded](crate::Decimal::rescale) to two decimal places.
 	///
 	/// # See
 	///
