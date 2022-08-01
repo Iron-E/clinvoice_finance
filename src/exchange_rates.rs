@@ -126,16 +126,18 @@ mod tests
 	#[tokio::test]
 	async fn new()
 	{
+		let filepath = ExchangeRates::filepath();
+		if filepath.exists()
 		{
-			let filepath = ExchangeRates::filepath();
-			if filepath.exists()
-			{
-				fs::remove_file(&filepath).unwrap();
-			}
+			fs::remove_file(&filepath).unwrap();
 		}
 
+		assert!(!filepath.is_file());
 		let downloaded = ExchangeRates::new().await.unwrap();
+		assert!(filepath.is_file());
+
 		let cached = ExchangeRates::new().await.unwrap();
+		assert!(filepath.is_file());
 		assert_eq!(downloaded, cached);
 	}
 }
