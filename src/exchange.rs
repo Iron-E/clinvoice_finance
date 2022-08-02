@@ -5,7 +5,8 @@ use crate::{Currency, ExchangeRates};
 /// the [rates](ExchangeRates) of conversion.
 pub trait Exchange
 {
-	/// Exchange some quantity into another `currency` using `rates`.
+	/// Exchange some quantity into another `currency` using `rates`. Derived from the
+	/// [`exchange_mut`](Self::exchange_mut) implementation.
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
 	where
 		Self: Sized,
@@ -15,7 +16,7 @@ pub trait Exchange
 		s
 	}
 
-	/// Does the same thing as [`Exchange::exchange`], but modifies the receiver in-place.
+	/// Mutably exchange some quantity into another `currency` using `rates`.
 	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates);
 }
 

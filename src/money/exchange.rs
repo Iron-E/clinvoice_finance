@@ -5,9 +5,9 @@ impl Exchange for Money
 {
 	/// The result will be [rounded](crate::Decimal::rescale) to two decimal places.
 	///
-	/// # See
+	/// # See also
 	///
-	/// * [`Exchange::exchange`]
+	/// * [`Exchange::exchange_mut`]
 	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates)
 	{
 		// noop for same currency
