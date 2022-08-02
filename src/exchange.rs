@@ -1,20 +1,45 @@
-use crate::{Currency, ExchangeMut, ExchangeRates};
+use crate::{Currency, ExchangeRates};
 
 /// Implementors of this trait contain quantities which are relative to the [`Currency`] they are
 /// currently in. To view them in another [`Currency`], they must be [exchanged](Exchange::exchange) using
 /// the [rates](ExchangeRates) of conversion.
-pub trait Exchange: ExchangeMut + Sized
+pub trait Exchange
 {
 	/// Exchange some quantity into another `currency` using `rates`.
 	fn exchange(self, currency: Currency, rates: &ExchangeRates) -> Self
+	where
+		Self: Sized,
 	{
 		let mut s = self;
 		s.exchange_mut(currency, rates);
 		s
 	}
+
+	/// Does the same thing as [`Exchange::exchange`], but modifies the receiver in-place.
+	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates);
 }
 
-impl<T> Exchange for T where T: ExchangeMut {}
+impl<T> Exchange for [T]
+where
+	T: Exchange,
+{
+	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates)
+	{
+		self
+			.iter_mut()
+			.for_each(|t| t.exchange_mut(currency, rates));
+	}
+}
+
+impl<T> Exchange for Vec<T>
+where
+	T: Exchange,
+{
+	fn exchange_mut(&mut self, currency: Currency, rates: &ExchangeRates)
+	{
+		self.as_mut_slice().exchange_mut(currency, rates);
+	}
+}
 
 #[cfg(test)]
 mod tests
@@ -28,14 +53,20 @@ mod tests
 	{
 		let rates = SAMPLE_EXCHANGE_RATES_CSV.parse().unwrap();
 
-		vec![
+		let mut money = vec![
 			Money::new(1750, 0, Currency::Jpy),
 			Money::new(20_00, 2, Currency::Usd),
-		]
-		.exchange(Default::default(), &rates)
-		.into_iter()
-		.for_each(|m| {
-			assert_eq!(m.currency, Default::default());
-		});
+		];
+
+		let exchanged = money.clone().exchange(Default::default(), &rates);
+
+		money.exchange_mut(Default::default(), &rates);
+		money
+			.into_iter()
+			.zip(exchanged.into_iter())
+			.for_each(|(lhs, rhs)| {
+				assert_eq!(lhs, rhs);
+				assert_eq!(lhs.currency, Currency::Eur);
+			});
 	}
 }

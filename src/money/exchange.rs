@@ -1,7 +1,7 @@
 use super::Money;
-use crate::{Currency, ExchangeMut, ExchangeRates};
+use crate::{Currency, Exchange, ExchangeRates};
 
-impl ExchangeMut for Money
+impl Exchange for Money
 {
 	/// The result will be [rounded](crate::Decimal::rescale) to two decimal places.
 	///
