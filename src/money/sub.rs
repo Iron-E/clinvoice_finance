@@ -1,7 +1,6 @@
 use core::ops::Sub;
 
 use super::Money;
-use crate::Decimal;
 
 impl Sub for Money
 {
@@ -35,6 +34,6 @@ impl Sub for Money
 	/// ```
 	fn sub(self, rhs: Self) -> Self::Output
 	{
-		self.unchecked(Decimal::sub, rhs)
+		self.unchecked(Sub::sub, rhs)
 	}
 }

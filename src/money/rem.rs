@@ -1,7 +1,6 @@
 use core::ops::Rem;
 
 use super::Money;
-use crate::Decimal;
 
 impl Rem for Money
 {
@@ -35,6 +34,6 @@ impl Rem for Money
 	/// ```
 	fn rem(self, rhs: Self) -> Self::Output
 	{
-		self.unchecked(Decimal::rem, rhs)
+		self.unchecked(Rem::rem, rhs)
 	}
 }

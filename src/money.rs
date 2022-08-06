@@ -1,4 +1,5 @@
 mod add;
+mod add_assign;
 #[cfg(feature = "num-traits")]
 mod checked_add;
 #[cfg(feature = "num-traits")]
@@ -11,11 +12,15 @@ mod checked_rem;
 mod checked_sub;
 mod display;
 mod div;
+mod div_assign;
 mod exchange;
 mod from_str;
 mod mul;
+mod mul_assign;
 mod rem;
+mod rem_assign;
 mod sub;
+mod sub_assign;
 mod try_from;
 
 #[cfg(feature = "serde")]

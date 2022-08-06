@@ -1,7 +1,6 @@
 use core::ops::Add;
 
 use super::Money;
-use crate::Decimal;
 
 impl Add for Money
 {
@@ -9,7 +8,7 @@ impl Add for Money
 
 	/// # Panics
 	///
-	/// * If this currency and the `operand`'s currency are not the same.
+	/// * If this currency and the `rhs`'s currency are not the same.
 	/// * When [`Decimal::add`] does.
 	///
 	/// # See also
@@ -35,6 +34,6 @@ impl Add for Money
 	/// ```
 	fn add(self, rhs: Self) -> Self::Output
 	{
-		self.unchecked(Decimal::add, rhs)
+		self.unchecked(Add::add, rhs)
 	}
 }

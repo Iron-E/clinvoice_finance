@@ -1,7 +1,6 @@
 use core::ops::Mul;
 
 use super::Money;
-use crate::Decimal;
 
 impl Mul for Money
 {
@@ -35,6 +34,6 @@ impl Mul for Money
 	/// ```
 	fn mul(self, rhs: Self) -> Self::Output
 	{
-		self.unchecked(Decimal::mul, rhs)
+		self.unchecked(Mul::mul, rhs)
 	}
 }

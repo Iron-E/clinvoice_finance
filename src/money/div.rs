@@ -1,7 +1,6 @@
 use core::ops::Div;
 
 use super::Money;
-use crate::Decimal;
 
 impl Div for Money
 {
@@ -35,6 +34,6 @@ impl Div for Money
 	/// ```
 	fn div(self, rhs: Self) -> Self::Output
 	{
-		self.unchecked(Decimal::div, rhs)
+		self.unchecked(Div::div, rhs)
 	}
 }
