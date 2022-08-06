@@ -16,7 +16,7 @@ impl FromStr for ExchangeRates
 		{
 			Error::Decode {
 				context: "the exchange rates CSV from the ECB".into(),
-				reason: format!("there was no {column} column"),
+				reason:  format!("there was no {column} column"),
 			}
 		}
 

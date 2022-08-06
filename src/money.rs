@@ -25,7 +25,8 @@ use crate::{Currency, Decimal};
 
 /// An `amount` of [`Currency`].
 ///
-/// To find out how much the `amount` would be in another [`Currency`], use [`exchange`](crate::Exchange::exchange).
+/// To find out how much the `amount` would be in another [`Currency`], use
+/// [`exchange`](crate::Exchange::exchange).
 ///
 /// # See also
 ///
@@ -43,8 +44,8 @@ pub struct Money
 
 impl Money
 {
-	/// Performs a checked (i.e. the currencies are the same, otherwise returning [`None`]) `operation`
-	/// on this value and the `operand`.
+	/// Performs a checked (i.e. the currencies are the same, otherwise returning [`None`])
+	/// `operation` on this value and the `operand`.
 	fn checked(
 		self,
 		operation: fn(Decimal, Decimal) -> Option<Decimal>,
@@ -54,10 +55,8 @@ impl Money
 		match self.currency == operand.currency
 		{
 			false => None,
-			_ => operation(self.amount, operand.amount).map(|amount| Self {
-				amount,
-				currency: self.currency,
-			}),
+			_ => operation(self.amount, operand.amount)
+				.map(|amount| Self { amount, currency: self.currency }),
 		}
 	}
 
@@ -182,10 +181,7 @@ impl Money
 	/// ```
 	pub fn new(amount: i64, decimal_places: u32, currency: Currency) -> Self
 	{
-		Self {
-			amount: Decimal::new(amount, decimal_places),
-			currency,
-		}
+		Self { amount: Decimal::new(amount, decimal_places), currency }
 	}
 
 	/// Performs an unchecked (i.e. panicking) `operation` on this value and the `operand`.
@@ -203,10 +199,7 @@ impl Money
 				self, operand
 			),
 
-			_ => Self {
-				amount: operation(self.amount, operand.amount),
-				currency: self.currency,
-			},
+			_ => Self { amount: operation(self.amount, operand.amount), currency: self.currency },
 		}
 	}
 }

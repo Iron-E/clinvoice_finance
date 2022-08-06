@@ -56,10 +56,7 @@ impl ExchangeRates
 	/// * [`None`] otherwise.
 	pub fn get(&self, current: &Currency, desired: &Currency) -> Option<Decimal>
 	{
-		self
-			.0
-			.get(current)
-			.and_then(|c| self.0.get(desired).map(|d| d / c))
+		self.0.get(current).and_then(|c| self.0.get(desired).map(|d| d / c))
 	}
 
 	/// Same as [`ExchangeRates::get`], except using range syntax (i.e. `current..desired`) and
@@ -71,10 +68,7 @@ impl ExchangeRates
 	pub fn index(&self, range: Range<&Currency>) -> Decimal
 	{
 		self.get(range.start, range.end).unwrap_or_else(|| {
-			panic!(
-				"Either {} or {} was not found in {self:?}",
-				range.start, range.end
-			)
+			panic!("Either {} or {} was not found in {self:?}", range.start, range.end)
 		})
 	}
 
@@ -91,18 +85,17 @@ impl ExchangeRates
 			path if path.exists() => fs::read_to_string(&path)?,
 			path =>
 			{
-				let cursor = reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
-					.and_then(Response::bytes)
-					.await
-					.map(Cursor::new)?;
+				let cursor =
+					reqwest::get("https://www.ecb.europa.eu/stats/eurofxref/eurofxref.zip")
+						.and_then(Response::bytes)
+						.await
+						.map(Cursor::new)?;
 
 				let mut archive = ZipArchive::new(cursor)?;
 				let mut csv = archive.by_index(0)?;
 
 				let mut csv_contents = String::with_capacity(
-					csv.size()
-						.try_into()
-						.expect("ECB CSV size should fit into `usize`"),
+					csv.size().try_into().expect("ECB CSV size should fit into `usize`"),
 				);
 				csv.read_to_string(&mut csv_contents)?;
 

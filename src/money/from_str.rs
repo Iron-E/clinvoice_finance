@@ -12,7 +12,7 @@ impl FromStr for Money
 		let new_error = |field: &str| -> Error {
 			Error::Decode {
 				context: format!(r#""{s}" into money"#),
-				reason: format!("there was no {field}"),
+				reason:  format!("there was no {field}"),
 			}
 		};
 
@@ -24,10 +24,7 @@ impl FromStr for Money
 			literal.parse()?
 		};
 
-		let currency = split
-			.next()
-			.ok_or_else(|| new_error("currency"))
-			.and_then(str::parse)?;
+		let currency = split.next().ok_or_else(|| new_error("currency")).and_then(str::parse)?;
 
 		drop(split);
 		// }}}
