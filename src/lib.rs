@@ -4,6 +4,7 @@
 //!
 //! # Features
 //!
+//! * `num-traits` adds support for the [num-traits](https://docs.rs/num-traits/) crate.
 //! * `serde` adds support for the [serde](https://serde.rs) crate.
 //!
 //! # Re-exports
