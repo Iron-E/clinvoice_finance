@@ -15,8 +15,8 @@ impl AddAssign for Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let mut foo = Money::new(10, 0, Currency::Eur);
 	/// foo += Money::new(0_50, 2, Currency::Eur);
@@ -24,8 +24,8 @@ impl AddAssign for Money
 	/// ```
 	///
 	/// ```rust,should_panic
-	/// # use pretty_assertions::assert_eq;
 	/// # use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	/// #
 	/// # let mut foo = Money::new(10, 0, Currency::Eur);
 	/// foo += Money::new(0_50, 2, Currency::Usd);

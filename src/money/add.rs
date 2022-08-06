@@ -18,8 +18,8 @@ impl Add for Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   Money::new(10, 0, Currency::Eur) + Money::new(0_50, 2, Currency::Eur),
@@ -28,8 +28,8 @@ impl Add for Money
 	/// ```
 	///
 	/// ```rust,should_panic
-	/// # use pretty_assertions::assert_eq;
 	/// # use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	/// let _ = Money::new(10, 0, Currency::Eur) + Money::new(0_50, 2, Currency::Usd);
 	/// ```
 	fn add(self, rhs: Self) -> Self::Output

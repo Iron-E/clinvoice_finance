@@ -18,8 +18,8 @@ impl Rem for Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// assert_eq!(
 	///   Money::new(10, 0, Currency::Eur) % Money::new(3, 0, Currency::Eur),
@@ -28,8 +28,8 @@ impl Rem for Money
 	/// ```
 	///
 	/// ```rust,should_panic
-	/// # use pretty_assertions::assert_eq;
 	/// # use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	/// let _ = Money::new(10, 0, Currency::Eur) % Money::new(3, 0, Currency::Usd);
 	/// ```
 	fn rem(self, rhs: Self) -> Self::Output

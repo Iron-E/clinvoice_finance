@@ -70,8 +70,8 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let a = Money::new(20_00, 2, Currency::Usd);
 	///
@@ -91,8 +91,8 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let a = Money::new(20_00, 2, Currency::Usd);
 	///
@@ -112,8 +112,8 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let a = Money::new(20_00, 2, Currency::Usd);
 	///
@@ -133,8 +133,8 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let a = Money::new(20_00, 2, Currency::Usd);
 	///
@@ -154,8 +154,8 @@ impl Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let a = Money::new(20_00, 2, Currency::Usd);
 	///

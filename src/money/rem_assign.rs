@@ -15,8 +15,8 @@ impl RemAssign for Money
 	/// # Examples
 	///
 	/// ```rust
-	/// # use pretty_assertions::assert_eq;
 	/// use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	///
 	/// let mut foo = Money::new(10, 0, Currency::Eur);
 	/// foo %= Money::new(3, 0, Currency::Eur);
@@ -24,8 +24,8 @@ impl RemAssign for Money
 	/// ```
 	///
 	/// ```rust,should_panic
-	/// # use pretty_assertions::assert_eq;
 	/// # use money2::{Currency, Money};
+	/// # use pretty_assertions::assert_eq;
 	/// #
 	/// # let mut foo = Money::new(10, 0, Currency::Eur);
 	/// foo %= Money::new(3, 0, Currency::Usd);
