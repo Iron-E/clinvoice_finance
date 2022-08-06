@@ -28,6 +28,129 @@ pub struct Money
 
 impl Money
 {
+	/// Performs a checked (i.e. the currencies are the same, otherwise returning [`None`]) `operation`
+	/// on this value and the `operand`.
+	fn checked(
+		self,
+		operation: fn(Decimal, Decimal) -> Option<Decimal>,
+		operand: Self,
+	) -> Option<Self>
+	{
+		match self.currency == operand.currency
+		{
+			false => None,
+			_ => operation(self.amount, operand.amount).map(|amount| Self {
+				amount,
+				currency: self.currency,
+			}),
+		}
+	}
+
+	/// Returns [`Some`] if `rhs` is the same [`Currency`] and doesn't over/underflow.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use pretty_assertions::assert_eq;
+	/// use money2::{Currency, Money};
+	///
+	/// let a = Money::new(20_00, 2, Currency::Usd);
+	///
+	/// assert_eq!(a.checked_add(Money::new(1, 0, Currency::Eur)), None);
+	/// assert_eq!(
+	///   a.checked_add(Money::new(5, 0, Currency::Usd)),
+	///   Some(Money::new(25, 0, Currency::Usd))
+	/// );
+	/// ```
+	pub fn checked_add(self, rhs: Self) -> Option<Self>
+	{
+		self.checked(Decimal::checked_add, rhs)
+	}
+
+	/// Returns [`Some`] if `rhs` is the same [`Currency`] and doesn't over/underflow.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use pretty_assertions::assert_eq;
+	/// use money2::{Currency, Money};
+	///
+	/// let a = Money::new(20_00, 2, Currency::Usd);
+	///
+	/// assert_eq!(a.checked_div(Money::new(1, 0, Currency::Eur)), None);
+	/// assert_eq!(
+	///   a.checked_div(Money::new(2, 0, Currency::Usd)),
+	///   Some(Money::new(10, 0, Currency::Usd))
+	/// );
+	/// ```
+	pub fn checked_div(self, rhs: Self) -> Option<Self>
+	{
+		self.checked(Decimal::checked_div, rhs)
+	}
+
+	/// Returns [`Some`] if `rhs` is the same [`Currency`] and doesn't over/underflow.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use pretty_assertions::assert_eq;
+	/// use money2::{Currency, Money};
+	///
+	/// let a = Money::new(20_00, 2, Currency::Usd);
+	///
+	/// assert_eq!(a.checked_mul(Money::new(1, 0, Currency::Eur)), None);
+	/// assert_eq!(
+	///   a.checked_mul(Money::new(2, 0, Currency::Usd)),
+	///   Some(Money::new(40, 0, Currency::Usd))
+	/// );
+	/// ```
+	pub fn checked_mul(self, rhs: Self) -> Option<Self>
+	{
+		self.checked(Decimal::checked_mul, rhs)
+	}
+
+	/// Returns [`Some`] if `rhs` is the same [`Currency`] and doesn't over/underflow.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use pretty_assertions::assert_eq;
+	/// use money2::{Currency, Money};
+	///
+	/// let a = Money::new(20_00, 2, Currency::Usd);
+	///
+	/// assert_eq!(a.checked_rem(Money::new(1, 0, Currency::Eur)), None);
+	/// assert_eq!(
+	///   a.checked_rem(Money::new(3, 0, Currency::Usd)),
+	///   Some(Money::new(2, 0, Currency::Usd))
+	/// );
+	/// ```
+	pub fn checked_rem(self, rhs: Self) -> Option<Self>
+	{
+		self.checked(Decimal::checked_rem, rhs)
+	}
+
+	/// Returns [`Some`] if `rhs` is the same [`Currency`] and doesn't over/underflow.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use pretty_assertions::assert_eq;
+	/// use money2::{Currency, Money};
+	///
+	/// let a = Money::new(20_00, 2, Currency::Usd);
+	///
+	/// assert_eq!(a.checked_sub(Money::new(1, 0, Currency::Eur)), None);
+	/// assert_eq!(
+	///   a.checked_sub(Money::new(5, 0, Currency::Usd)),
+	///   Some(Money::new(15, 0, Currency::Usd))
+	/// );
+	/// ```
+	pub fn checked_sub(self, rhs: Self) -> Option<Self>
+	{
+		self.checked(Decimal::checked_sub, rhs)
+	}
+
 	/// Create new [`Money`].
 	///
 	/// # Examples
