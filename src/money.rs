@@ -1,6 +1,11 @@
+mod add;
 mod display;
+mod div;
 mod exchange;
 mod from_str;
+mod mul;
+mod rem;
+mod sub;
 mod try_from;
 
 #[cfg(feature = "serde")]
@@ -170,6 +175,28 @@ impl Money
 		Self {
 			amount: Decimal::new(amount, decimal_places),
 			currency,
+		}
+	}
+
+	/// Performs an unchecked (i.e. panicking) `operation` on this value and the `operand`.
+	///
+	/// # Panics
+	///
+	/// * If this currency and the `operand`'s currency are not the same.
+	/// * If `operation` does.
+	fn unchecked(self, operation: fn(Decimal, Decimal) -> Decimal, operand: Self) -> Self
+	{
+		match self.currency == operand.currency
+		{
+			false => panic!(
+				"Attempted to perform operation on {} and {}, which have differing currencies",
+				self, operand
+			),
+
+			_ => Self {
+				amount: operation(self.amount, operand.amount),
+				currency: self.currency,
+			},
 		}
 	}
 }
