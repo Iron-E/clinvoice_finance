@@ -94,9 +94,9 @@ impl ExchangeRates
 				let mut archive = ZipArchive::new(cursor)?;
 				let mut csv = archive.by_index(0)?;
 
-				let mut csv_contents = String::with_capacity(
-					csv.size().try_into().expect("ECB CSV size should fit into `usize`"),
-				);
+				// NOTE: Capacity hint is fine to truncate on 32-bit platforms, it will still
+				//       improve perf.
+				let mut csv_contents = String::with_capacity(csv.size() as usize);
 				csv.read_to_string(&mut csv_contents)?;
 
 				// cache the download for next time this method is called
