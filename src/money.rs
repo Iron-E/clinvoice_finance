@@ -1,4 +1,14 @@
 mod add;
+#[cfg(feature = "num-traits")]
+mod checked_add;
+#[cfg(feature = "num-traits")]
+mod checked_div;
+#[cfg(feature = "num-traits")]
+mod checked_mul;
+#[cfg(feature = "num-traits")]
+mod checked_rem;
+#[cfg(feature = "num-traits")]
+mod checked_sub;
 mod display;
 mod div;
 mod exchange;
