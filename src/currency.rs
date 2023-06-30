@@ -63,9 +63,6 @@ pub enum Currency
 	/// The Hong Kong dollar.
 	Hkd,
 
-	/// The Croatian kuna.
-	Hrk,
-
 	/// The Hungarian forint.
 	Huf,
 

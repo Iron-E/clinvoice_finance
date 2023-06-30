@@ -71,7 +71,6 @@ mod tests
 					(Currency::Eur, Decimal::new(1, 0)),
 					(Currency::Gbp, Decimal::new(85955, 5)),
 					(Currency::Hkd, Decimal::new(9_4551, 4)),
-					(Currency::Hrk, Decimal::new(7_5013, 4)),
 					(Currency::Huf, Decimal::new(345_82, 2)),
 					(Currency::Idr, Decimal::new(17420_91, 2)),
 					(Currency::Ils, Decimal::new(3_9598, 4)),
