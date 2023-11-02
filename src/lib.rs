@@ -86,12 +86,15 @@ mod currency;
 mod error;
 mod exchange;
 mod exchange_rates;
+mod historical_exchange_rates;
 mod money;
+mod request;
 
 pub use currency::Currency;
 pub use error::{Error, Result};
 pub use exchange::Exchange;
 pub use exchange_rates::ExchangeRates;
+pub use historical_exchange_rates::HistoricalExchangeRates;
 pub use money::Money;
 pub use rust_decimal::Decimal;
 
