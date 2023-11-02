@@ -1,9 +1,12 @@
-use core::ops::Range;
-use std::collections::BTreeMap;
-use std::sync::OnceLock as StdOnceLock;
+mod heading;
 
-use chrono::{DateTime, Local, NaiveDate, NaiveDate, Duration, NaiveDateTime};
-use futures::TryFutureExt;
+use std::{
+	collections::{BTreeMap, HashMap},
+	sync::OnceLock as StdOnceLock,
+};
+
+use chrono::{DateTime, Duration, Local, NaiveDate};
+use heading::Heading;
 use tokio::sync::{OnceCell, RwLock};
 
 use crate::{request, Currency, Decimal, Error, ExchangeRates, Result};
@@ -22,24 +25,10 @@ pub struct HistoricalExchangeRates;
 
 type HistoricalExchangeMap = BTreeMap<NaiveDate, ExchangeRates>;
 type HistoricalExchangeLock = RwLock<HistoricalExchangeMap>;
-static CELL: OnceCell<HistoricalExchangeLock> = OnceCell::new();
-
-enum Header
-{
-	Currency(Currency),
-	Date,
-	Invalid,
-}
-
-enum Value
-{
-	Date(NaiveDate),
-	Decimal(Decimal),
-	Invalid,
-}
 
 /// Gets the [`Local`] time and converts it to a [`NaiveDateTime`].
-fn local_now() -> NaiveDate {
+fn local_now() -> NaiveDate
+{
 	Local::now().naive_local().date()
 }
 
@@ -48,15 +37,20 @@ impl HistoricalExchangeRates
 	/// The single in-memory representation of the [`HistoricalExchangeMap`].
 	pub async fn cached() -> Result<&'static HistoricalExchangeLock>
 	{
+		static CELL: OnceCell<HistoricalExchangeLock> = OnceCell::const_new();
 		static LAST_CHECK: StdOnceLock<RwLock<NaiveDate>> = StdOnceLock::new();
-		let cached = CELL.get_or_try_init(|| async {
-			let map = Self::new().await?;
-			LAST_CHECK.set(local_now().into());
-			Result::Ok(RwLock::new(map))
-		}).await?;
+
+		let cached = CELL
+			.get_or_try_init(|| async {
+				let map = Self::new().await?;
+				LAST_CHECK.set(local_now().into()).ok();
+				Result::Ok(RwLock::new(map))
+			})
+			.await?;
 
 		let now = local_now();
-		if LAST_CHECK.get().unwrap().read().await.signed_duration_since(now) >= Duration::days(1) {
+		if LAST_CHECK.get().unwrap().read().await.signed_duration_since(now) >= Duration::days(1)
+		{
 			let mut history = cached.write().await;
 			*history = Self::new().await?;
 			drop(history);
@@ -89,10 +83,16 @@ impl HistoricalExchangeRates
 	{
 		let rates = Self::get(date).await.unwrap();
 		rates.unwrap_or_else(|| {
-			panic!("The history of exchange rates had no record of {}", date.unwrap_or_else(Local::now).naive_local())
+			panic!(
+				"The history of exchange rates had no record of {}",
+				date.unwrap_or_else(Local::now).naive_local()
+			)
 		})
 	}
 
+	/// Download the latest historical record of exchange rate data from the [ECB][ecb] and parse it
+	/// into a [`HistoricalExchangeMap`].
+	///
 	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 	async fn new() -> Result<HistoricalExchangeMap>
 	{
@@ -101,17 +101,51 @@ impl HistoricalExchangeRates
 				.await?;
 
 		let mut lines = csv.lines().map(|line| line.split(','));
-		let headers = lines.next().ok_or_else(|| Error::csv_row_missing("headers"))?;
-		lines.try_fold(BTreeMap::new(), |m, values| {
-			headers.zip(values).filter_map(|(header, value)| match header
-			{
-				"Date" => value.parse::<NaiveDate>().ok().and_then(|d| {
-					d.and_hms_opt(0, 0, 0).map(|dt| (Header::Date, Value::Date(dt)))
-				}),
-			});
+		let headers: Vec<_> =
+			lines
+				.next()
+				.map(|split| {
+					split
+						.map(|header| match header
+						{
+							"Date" => Heading::Date,
+							h => Currency::reverse_lookup(h)
+								.map_or(Heading::Invalid, Heading::Currency),
+						})
+						.collect()
+				})
+				.ok_or_else(|| Error::csv_row_missing("headers"))?;
 
-			Ok(m)
-		})
+		Ok(lines.fold(BTreeMap::new(), |mut m, values| {
+			let (date, rates) = headers.iter().zip(values).fold(
+				(NaiveDate::default(), ExchangeRates(HashMap::new())),
+				|(mut date, mut rates), (header, value)| {
+					match header
+					{
+						Heading::Currency(c) =>
+						{
+							if let Ok(d) = value.parse::<Decimal>()
+							{
+								rates.0.insert(*c, d);
+							}
+						},
+						Heading::Date =>
+						{
+							if let Ok(d) = value.parse::<NaiveDate>()
+							{
+								date = d;
+							}
+						},
+						Heading::Invalid => (),
+					};
+
+					(date, rates)
+				},
+			);
+
+			m.insert(date, rates);
+			m
+		}))
 	}
 }
 
