@@ -5,7 +5,7 @@ authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "For storing and asynchronously converting between (a subset of) ISO-4217 currencies"
 edition = "2021"
 name = "money2"
-version = "2.0.0"
+version = "1.1.0"
 
 categories = ["asynchronous", "caching", "data-structures", "mathematics", "parser-implementations"]
 documentation = "https://docs.rs/money2"
@@ -32,7 +32,8 @@ pretty_assertions = "1"
 tokio = {features = ["macros", "rt-multi-thread"], version = "1"}
 
 [features]
-default = ['tokio']
+default = []
+all = ['history', 'num-traits', 'serde']
+history = ['dep:tokio']
 num-traits = ["dep:num-traits"]
 serde = ["rust_decimal/serde-str", "serde/derive"]
-tokio = ['dep:tokio']
