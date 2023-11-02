@@ -190,25 +190,44 @@ impl HistoricalExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use std::fs;
-
-	use super::ExchangeRates;
+	use super::{Currency, Decimal, ExchangeRates, HistoricalExchangeRates, NaiveDate, Result};
 
 	#[tokio::test]
-	async fn new()
+	async fn cached() -> Result<()>
 	{
-		let filepath = ExchangeRates::filepath(None);
-		if filepath.exists()
-		{
-			fs::remove_file(&filepath).unwrap();
-		}
+		let lock = HistoricalExchangeRates::cached().await?;
+		let history = lock.read().await;
 
-		assert!(!filepath.is_file());
-		let downloaded = ExchangeRates::new().await.unwrap();
-		assert!(filepath.is_file());
+		let (date, rates) = history.first_key_value().unwrap();
+		assert_eq!(date, &NaiveDate::from_ymd_opt(1999, 01, 04).unwrap());
+		assert_eq!(
+			rates,
+			&ExchangeRates(
+				[
+					(Currency::Aud, Decimal::new(1_91, 2)),
+					(Currency::Cad, Decimal::new(1_8004, 4)),
+					(Currency::Chf, Decimal::new(1_6168, 4)),
+					(Currency::Czk, Decimal::new(35_107, 3)),
+					(Currency::Dkk, Decimal::new(7_4501, 4)),
+					(Currency::Gbp, Decimal::new(0_7111, 4)),
+					(Currency::Hkd, Decimal::new(9_1332, 4)),
+					(Currency::Huf, Decimal::new(251_48, 2)),
+					(Currency::Isk, Decimal::new(81_48, 2)),
+					(Currency::Jpy, Decimal::new(133_73, 2)),
+					(Currency::Krw, Decimal::new(1398_59, 2)),
+					(Currency::Nok, Decimal::new(8_855, 3)),
+					(Currency::Nzd, Decimal::new(2_2229, 4)),
+					(Currency::Pln, Decimal::new(4_0712, 4)),
+					(Currency::Sek, Decimal::new(9_4696, 4)),
+					(Currency::Sgd, Decimal::new(1_9554, 4)),
+					(Currency::Usd, Decimal::new(1_1789, 4)),
+					(Currency::Zar, Decimal::new(6_9358, 4)),
+				]
+				.into_iter()
+				.collect()
+			)
+		);
 
-		let cached = ExchangeRates::new().await.unwrap();
-		assert!(filepath.is_file());
-		assert_eq!(downloaded, cached);
+		Ok(())
 	}
 }
