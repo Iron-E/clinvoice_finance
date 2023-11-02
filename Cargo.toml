@@ -5,7 +5,7 @@ authors = ["Iron-E <code.iron.e@gmail.com>"]
 description = "For storing and asynchronously converting between (a subset of) ISO-4217 currencies"
 edition = "2021"
 name = "money2"
-version = "1.0.0"
+version = "2.0.0"
 
 categories = ["asynchronous", "caching", "data-structures", "mathematics", "parser-implementations"]
 documentation = "https://docs.rs/money2"
@@ -23,6 +23,7 @@ rust_decimal = "1"
 serde = {optional = true, version = "1"}
 strum = {features = ["derive"], version = "0.24"}
 thiserror = "1"
+unicase = "2"
 zip = "0.6"
 
 [dev-dependencies]

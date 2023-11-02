@@ -2,9 +2,12 @@ mod display;
 mod from_str;
 mod try_from;
 
+use std::{collections::HashMap, sync::OnceLock};
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-use strum::{EnumCount, EnumIter, IntoStaticStr};
+use strum::{EnumCount, EnumIter, IntoEnumIterator, IntoStaticStr};
+use unicase::UniCase;
 
 /// [ISO-4217][iso] currency codes which are reported by the [European Central Bank][ecb] for
 /// exchange.
@@ -125,4 +128,19 @@ pub enum Currency
 
 	/// The South African rand.
 	Zar,
+}
+
+impl Currency
+{
+	/// Attempts to convert a given string into a concrete [`Currency`], returning [`Some`] if the
+	/// operation succeeds, or [`None`] if not.
+	pub(crate) fn reverse_lookup(s: &str) -> Option<Currency>
+	{
+		static CELL: OnceLock<HashMap<UniCase<&'static str>, Currency>> = OnceLock::new();
+		CELL.get_or_init(|| {
+			Self::iter().map(|currency| (UniCase::new(currency.into()), currency)).collect()
+		})
+		.get(&s.into())
+		.copied()
+	}
 }

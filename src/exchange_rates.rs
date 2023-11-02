@@ -113,19 +113,23 @@ impl ExchangeRates
 
 		let mut lines = csv.lines().map(|line| line.split(','));
 		let headers = lines.next().ok_or_else(|| Error::csv_row_missing("headers"))?;
-		let map: BTreeMap<NaiveDateTime, Self> =
-			lines.try_fold(BTreeMap::new(), |m, values| {
-				headers.zip(values).filter_map(|(header, value)| match header
-				{
-					"Date" => value.parse::<NaiveDate>().ok().and_then(|d| {
-						d.and_hms_opt(0, 0, 0).map(|dt| (Header::Date, Value::Date(dt)))
-					}),
-				});
+		let map: BTreeMap<NaiveDateTime, Self> = lines.try_fold(BTreeMap::new(), |m, values| {
+			headers.zip(values).filter_map(|(header, value)| match header
+			{
+				"Date" => value
+					.parse::<NaiveDate>()
+					.ok()
+					.and_then(|d| d.and_hms_opt(0, 0, 0).map(|dt| (Header::Date, Value::Date(dt)))),
+			});
 
-				Ok(m)
-			})?;
+			Ok(m)
+		})?;
 
-		match map.range(..=date.naive_local()).rev().next().or_else(|| map.range(date.naive_local()..).next())
+		match map
+			.range(..=date.naive_local())
+			.rev()
+			.next()
+			.or_else(|| map.range(date.naive_local()..).next())
 		{
 			Some(entry) => Ok(entry.1.clone()),
 			None => Err(Error::Decode {
