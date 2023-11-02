@@ -134,7 +134,7 @@ impl Currency
 {
 	/// Attempts to convert a given string into a concrete [`Currency`], returning [`Some`] if the
 	/// operation succeeds, or [`None`] if not.
-	pub(crate) fn reverse_lookup(s: &str) -> Option<Currency>
+	pub(crate) fn reverse_lookup(s: &str) -> Option<Self>
 	{
 		static CELL: OnceLock<HashMap<UniCase<&'static str>, Currency>> = OnceLock::new();
 		CELL.get_or_init(|| {

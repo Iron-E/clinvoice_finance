@@ -6,14 +6,10 @@ use std::{
 	collections::HashMap,
 	env,
 	fs,
-	io::{Cursor, Read},
 	path::PathBuf,
 };
 
 use chrono::{Datelike, Local};
-use futures::TryFutureExt;
-use reqwest::Response;
-use zip::ZipArchive;
 
 use crate::{request, Currency, Decimal, Result};
 
@@ -82,7 +78,7 @@ impl ExchangeRates
 		{
 			// PERF: `money2` caches ECB data until `Self::filepath()` changes
 			// TODO: use `try_exists` after rust-lang/rust#83186
-			path if path.exists() => fs::read_to_string(&path)?,
+			path if path.exists() => fs::read_to_string(path)?,
 			path =>
 			{
 				let csv_contents = request::get_unzipped(

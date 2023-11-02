@@ -42,20 +42,20 @@ impl HistoricalExchangeRates
 
 		let cached = CELL
 			.get_or_try_init(|| async {
-				let map = Self::new().await?;
+				let map = Self::init().await?;
 				LAST_CHECK.set(local_now().into()).ok();
 				Result::Ok(RwLock::new(map))
 			})
 			.await?;
 
 		let now = local_now();
-		if LAST_CHECK.get().unwrap().read().await.signed_duration_since(now) >= Duration::days(1)
+		if LAST_CHECK.get_or_init(|| local_now().into()).read().await.signed_duration_since(now) >= Duration::days(1)
 		{
 			let mut history = cached.write().await;
-			*history = Self::new().await?;
+			*history = Self::init().await?;
 			drop(history);
 
-			let mut last_check = LAST_CHECK.get().unwrap().write().await;
+			let mut last_check = LAST_CHECK.get_or_init(|| local_now().into()).write().await;
 			*last_check = now;
 		}
 
@@ -72,13 +72,16 @@ impl HistoricalExchangeRates
 		let history = cached.read().await;
 		Ok(history
 			.range(..=naive)
-			.rev()
-			.next()
+			.next_back()
 			.or_else(|| history.range(naive..).next())
 			.map(|(_, rates)| rates.clone()))
 	}
 
-	/// Like [`get`] but panics if it returns [`Ok(None)`] or [`Err`].
+	/// Like `get` but panics if it returns [`Ok(None)`] or [`Err`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::get`] return [`Ok(None)`] or [`Err`].
 	pub async fn index(date: Option<DateTime<Local>>) -> ExchangeRates
 	{
 		let rates = Self::get(date).await.unwrap();
@@ -94,7 +97,7 @@ impl HistoricalExchangeRates
 	/// into a [`HistoricalExchangeMap`].
 	///
 	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
-	async fn new() -> Result<HistoricalExchangeMap>
+	async fn init() -> Result<HistoricalExchangeMap>
 	{
 		let csv =
 			request::get_unzipped("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip")

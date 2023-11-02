@@ -9,6 +9,6 @@ impl FromStr for Currency
 
 	fn from_str(s: &str) -> Result<Self>
 	{
-		Currency::reverse_lookup(s).ok_or_else(|| Error::UnsupportedCurrency(s.to_owned()))
+		Self::reverse_lookup(s).ok_or_else(|| Error::UnsupportedCurrency(s.to_owned()))
 	}
 }
