@@ -2,12 +2,7 @@ mod from_str;
 mod try_from;
 
 use core::ops::Range;
-use std::{
-	collections::HashMap,
-	env,
-	fs,
-	path::PathBuf,
-};
+use std::{collections::HashMap, env, fs, path::PathBuf};
 
 use chrono::{Datelike, Local};
 

@@ -35,24 +35,25 @@ fn local_now() -> NaiveDate
 impl HistoricalExchangeRates
 {
 	/// The single in-memory representation of the [`HistoricalExchangeMap`].
-	pub async fn cached() -> Result<&'static HistoricalExchangeLock>
+	pub(crate) async fn cached() -> Result<&'static HistoricalExchangeLock>
 	{
 		static CELL: OnceCell<HistoricalExchangeLock> = OnceCell::const_new();
 		static LAST_CHECK: StdOnceLock<RwLock<NaiveDate>> = StdOnceLock::new();
 
 		let cached = CELL
 			.get_or_try_init(|| async {
-				let map = Self::init().await?;
+				let map = Self::from_ecb().await?;
 				LAST_CHECK.set(local_now().into()).ok();
 				Result::Ok(RwLock::new(map))
 			})
 			.await?;
 
 		let now = local_now();
-		if LAST_CHECK.get_or_init(|| local_now().into()).read().await.signed_duration_since(now) >= Duration::days(1)
+		if LAST_CHECK.get_or_init(|| local_now().into()).read().await.signed_duration_since(now) >=
+			Duration::days(1)
 		{
 			let mut history = cached.write().await;
-			*history = Self::init().await?;
+			*history = Self::from_ecb().await?;
 			drop(history);
 
 			let mut last_check = LAST_CHECK.get_or_init(|| local_now().into()).write().await;
@@ -62,19 +63,44 @@ impl HistoricalExchangeRates
 		Ok(cached)
 	}
 
-	/// Retrieve the [`ExchangeRates`] from the given `date`. Returns an [`Err`] if something went
-	/// wrong retrieving the historical data, otherwise [`Ok(Some(rates))`] or [`Ok(None)`] to
-	/// indicate the presence or absence of the rates in the historical record.
+	/// Download the latest historical record of exchange rate data from the [ECB][ecb] and parse it
+	/// into a [`HistoricalExchangeMap`].
+	///
+	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
+	async fn from_ecb() -> Result<HistoricalExchangeMap>
+	{
+		let csv =
+			request::get_unzipped("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip")
+				.await?;
+
+		Self::parse_csv(&csv)
+	}
+
+	/// Retrieve the [`ExchangeRates`] from the given `date` (or the nearest-available date;
+	/// today if [`None`]). Returns an [`Err`] if something went wrong retrieving the historical
+	/// data, otherwise [`Ok(Some(rates))`] or [`Ok(None)`] to indicate the presence or absence of
+	/// the rates in the historical record.
 	pub async fn get(date: Option<DateTime<Local>>) -> Result<Option<ExchangeRates>>
 	{
-		let naive = date.map_or_else(local_now, |d| d.naive_local().date());
 		let cached = Self::cached().await?;
 		let history = cached.read().await;
-		Ok(history
+		Ok(Self::get_from(&history, date))
+	}
+
+	/// Retrieve the [`ExchangeRates`] from the given `date` (or the nearest-available date;
+	/// today if [`None`]). Returns [`Some(rates)`] or [`None`] to indicate the presence or absence
+	/// of the rates in the historical record.
+	pub fn get_from(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+	) -> Option<ExchangeRates>
+	{
+		let naive = date.map_or_else(local_now, |d| d.naive_local().date());
+		history
 			.range(..=naive)
 			.next_back()
 			.or_else(|| history.range(naive..).next())
-			.map(|(_, rates)| rates.clone()))
+			.map(|(_, rates)| rates.clone())
 	}
 
 	/// Like `get` but panics if it returns [`Ok(None)`] or [`Err`].
@@ -93,16 +119,25 @@ impl HistoricalExchangeRates
 		})
 	}
 
-	/// Download the latest historical record of exchange rate data from the [ECB][ecb] and parse it
-	/// into a [`HistoricalExchangeMap`].
+	/// Parse a CSV of the form:
 	///
-	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
-	async fn init() -> Result<HistoricalExchangeMap>
+	/// ```csv
+	/// Date,USA,JPY,…
+	/// 2022-02-28,0.813,89.1,…
+	/// …
+	/// ```
+	///
+	/// Returns [`Ok(map)`] if the CSV was successfully parsed, otherwise returns [`Err`].
+	///
+	/// # Additional Details
+	///
+	/// Normally, the [`HistoricalExchangeRates`] will manage an internal [`HistoricalExchangeMap`]
+	/// and update it periodically to keep it up-to-date as long as the program using this
+	/// feature-set runs.
+	///
+	/// However, if there is a need to manually parse this data, the option is available.
+	pub fn parse_csv(csv: &str) -> Result<HistoricalExchangeMap>
 	{
-		let csv =
-			request::get_unzipped("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip")
-				.await?;
-
 		let mut lines = csv.lines().map(|line| line.split(','));
 		let headers: Vec<_> =
 			lines
