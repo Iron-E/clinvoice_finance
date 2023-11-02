@@ -190,7 +190,15 @@ impl HistoricalExchangeRates
 #[cfg(test)]
 mod tests
 {
-	use super::{Currency, Decimal, ExchangeRates, HistoricalExchangeRates, NaiveDate, Result};
+	use super::{
+		Currency,
+		Decimal,
+		ExchangeRates,
+		HistoricalExchangeRates,
+		Local,
+		NaiveDate,
+		Result,
+	};
 
 	#[tokio::test]
 	async fn cached() -> Result<()>
@@ -227,6 +235,28 @@ mod tests
 				.collect()
 			)
 		);
+
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn get() -> Result<()>
+	{
+		let first =
+			HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(1999, 01, 04).and_then(|d| {
+				d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
+			}))
+			.await?;
+
+
+		let before =
+			HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(1998, 01, 01).and_then(|d| {
+				d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
+			}))
+			.await?;
+
+		assert!(first.is_some());
+		assert_eq!(first, before);
 
 		Ok(())
 	}
