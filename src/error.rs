@@ -1,6 +1,6 @@
 #![allow(clippy::std_instead_of_core)]
 
-use core::result::Result as StdResult;
+use core::{fmt::Display, result::Result as StdResult};
 use std::io;
 
 use thiserror::Error;
@@ -55,6 +55,21 @@ pub enum Error
 	/// rates.
 	#[error(transparent)]
 	Zip(#[from] zip::result::ZipError),
+}
+
+impl Error
+{
+	/// Returns an error which indicates that a CSV had a specific row missing which was expected to
+	/// be present.
+	pub(crate) fn csv_row_missing<D>(row: D) -> Self
+	where
+		D: Display,
+	{
+		Self::Decode {
+			context: "the exchange rates CSV from the ECB".into(),
+			reason:  format!("there was no {row} row"),
+		}
+	}
 }
 
 /// A [`Result`](StdResult) for the crate.
