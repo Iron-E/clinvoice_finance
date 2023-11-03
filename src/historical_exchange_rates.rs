@@ -146,7 +146,7 @@ impl HistoricalExchangeRates
 		Ok(lines.fold(BTreeMap::new(), |mut m, mut values| {
 			let date = values.next().and_then(|d| d.parse::<NaiveDate>().ok()).unwrap_or_default();
 
-			let rates = headers.iter().zip(values).fold(
+			let mut rates = headers.iter().zip(values).fold(
 				ExchangeRates(HashMap::new()),
 				|mut rates, (header, value)| {
 					// TODO: if-let chain
@@ -162,6 +162,9 @@ impl HistoricalExchangeRates
 				},
 			);
 
+			// NOTE: conversion to EUR is not stored in ECB exchange rates, since the rates are given in
+			//       context of EUR to some other currency.
+			rates.0.insert(Currency::Eur, 1.into());
 			m.insert(date, rates);
 			m
 		}))
@@ -208,6 +211,7 @@ mod tests
 					(Currency::Chf, Decimal::new(1_6168, 4)),
 					(Currency::Czk, Decimal::new(35_107, 3)),
 					(Currency::Dkk, Decimal::new(7_4501, 4)),
+					(Currency::Eur, 1.into()),
 					(Currency::Gbp, Decimal::new(0_7111, 4)),
 					(Currency::Hkd, Decimal::new(9_1332, 4)),
 					(Currency::Huf, Decimal::new(251_48, 2)),

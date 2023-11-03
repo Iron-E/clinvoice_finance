@@ -22,8 +22,10 @@ impl FromStr for ExchangeRates
 		// }}}
 
 		let mut map = HashMap::with_capacity(Currency::COUNT);
-		map.insert(Default::default(), 1.into());
 
+		// NOTE: conversion to EUR is not stored in ECB exchange rates, since the rates are given in
+		//       context of EUR to some other currency.
+		map.insert(Currency::Eur, 1.into());
 		currencies
 			.zip(rates)
 			.skip(1)
