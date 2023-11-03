@@ -138,14 +138,11 @@ impl HistoricalExchangeRates
 		let mut lines = csv.lines().map(|line| line.split(','));
 		let headers: Vec<_> = lines
 			.next()
-			.map(|split| split.skip(1).map(|h| Currency::reverse_lookup(h).map_or(None, Some)).collect())
+			.map(|split| split.skip(1).map(Currency::reverse_lookup).collect())
 			.ok_or_else(|| Error::csv_row_missing("headers"))?;
 
 		Ok(lines.fold(BTreeMap::new(), |mut m, mut values| {
-			let date = values
-				.next()
-				.and_then(|d| d.parse::<NaiveDate>().ok())
-				.unwrap_or_else(NaiveDate::default);
+			let date = values.next().and_then(|d| d.parse::<NaiveDate>().ok()).unwrap_or_default();
 
 			let rates = headers.iter().zip(values).fold(
 				ExchangeRates(HashMap::new()),
