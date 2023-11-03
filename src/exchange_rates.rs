@@ -66,6 +66,10 @@ impl ExchangeRates
 	/// Create a new [`ExchangeRates`] instance, which uses the [European Central Bank][ecb] to
 	/// determine how to convert between currencies.
 	///
+	/// PERF: consider using [`HistoricalExchangeRates::try_index(None)`] if your program runs for
+	///       long periods and you have to call this function frequently, since the historical
+	///       record is kept in-memory rather than on-disk.
+	///
 	/// [ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/
 	pub async fn new() -> Result<Self>
 	{
