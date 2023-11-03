@@ -73,8 +73,9 @@ impl HistoricalExchangeRates
 		Self::parse_csv(&csv)
 	}
 
-	/// Retrieve the [`ExchangeRates`] from the given `date` (or the nearest-available date;
-	/// today if [`None`]). Returns an [`Err`] if something went wrong retrieving the historical
+	/// Like [`get_from`], but uses an automatically-managed source of historical data from the ECB.
+	///
+	/// Returns an [`Err`] if something went wrong retrieving the historical
 	/// data, otherwise [`Ok(Some(rates))`] or [`Ok(None)`] to indicate the presence or absence of
 	/// the rates in the historical record.
 	pub async fn get(date: Option<DateTime<Local>>) -> Result<Option<ExchangeRates>>
@@ -87,10 +88,7 @@ impl HistoricalExchangeRates
 	/// Retrieve the [`ExchangeRates`] from the given `date` (or the nearest-available date;
 	/// today if [`None`]). Returns [`Some(rates)`] or [`None`] to indicate the presence or absence
 	/// of the rates in the historical record.
-	pub fn get_from(
-		history: &HistoricalExchangeMap,
-		date: Option<DateTime<Local>>,
-	) -> Option<ExchangeRates>
+	pub fn get_from(history: &HistoricalExchangeMap, date: Option<DateTime<Local>>) -> Option<ExchangeRates>
 	{
 		let naive = date.map_or_else(local_now, |d| d.naive_local().date());
 		history
@@ -100,20 +98,24 @@ impl HistoricalExchangeRates
 			.map(|(_, rates)| rates.clone())
 	}
 
-	/// Like `get` but panics if it returns [`Ok(None)`] or [`Err`].
+	/// Like [`HistoricalExchangeRates::try_index`] but panics if it returns [`Err`].
 	///
 	/// # Panics
 	///
-	/// * When [`HistoricalExchangeRates::get`] return [`Ok(None)`] or [`Err`].
+	/// * When [`HistoricalExchangeRates::try_index`] returns [`Err`].
 	pub async fn index(date: Option<DateTime<Local>>) -> ExchangeRates
 	{
-		let rates = Self::get(date).await.unwrap();
-		rates.unwrap_or_else(|| {
-			panic!(
-				"The history of exchange rates had no record of {}",
-				date.unwrap_or_else(Local::now).naive_local()
-			)
-		})
+		Self::try_index(date).await.unwrap()
+	}
+
+	/// Like [`HistoricalExchangeRates::get_from`] but panics if it returns [`None`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::get_from`] return [`None`].
+	pub async fn index_from(history: &HistoricalExchangeMap, date: Option<DateTime<Local>>) -> ExchangeRates
+	{
+		Self::get_from(history, date).unwrap()
 	}
 
 	/// Parse a CSV of the form:
@@ -163,6 +165,16 @@ impl HistoricalExchangeRates
 			m.insert(date, rates);
 			m
 		}))
+	}
+
+	/// Like [`HistoricalExchangeRates::get`] but panics if it returns [`Ok(None)`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::get`] return [`Ok(None)`].
+	pub async fn try_index(date: Option<DateTime<Local>>) -> Result<ExchangeRates>
+	{
+		Self::get(date).await.map(|rates| rates.expect("The internal historical record has no data"))
 	}
 }
 
