@@ -1,7 +1,5 @@
 use std::io::{Cursor, Read};
 
-use futures::TryFutureExt;
-use reqwest::Response;
 use zip::ZipArchive;
 
 use crate::Result;
@@ -10,9 +8,10 @@ use crate::Result;
 /// returning the first file inside the zip.
 pub async fn get_unzipped(url: &str) -> Result<String>
 {
-	let cursor = reqwest::get(url).and_then(Response::bytes).await.map(Cursor::new)?;
+	let response = reqwest::get(url).await?;
+	let bytes = response.bytes().await?;
 
-	let mut archive = ZipArchive::new(cursor)?;
+	let mut archive = ZipArchive::new(Cursor::new(bytes))?;
 	let mut file = archive.by_index(0)?;
 
 	// NOTE: Capacity hint is fine to truncate on 32-bit platforms, it will still
