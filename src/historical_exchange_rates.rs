@@ -1,5 +1,3 @@
-mod heading;
-
 use std::{
 	collections::{BTreeMap, HashMap},
 	sync::OnceLock as StdOnceLock,
@@ -139,45 +137,28 @@ impl HistoricalExchangeRates
 	pub fn parse_csv(csv: &str) -> Result<HistoricalExchangeMap>
 	{
 		let mut lines = csv.lines().map(|line| line.split(','));
-		let headers: Vec<_> =
-			lines
-				.next()
-				.map(|split| {
-					split
-						.map(|header| match header
-						{
-							"Date" => Heading::Date,
-							h => Currency::reverse_lookup(h)
-								.map_or(Heading::Invalid, Heading::Currency),
-						})
-						.collect()
-				})
-				.ok_or_else(|| Error::csv_row_missing("headers"))?;
+		let headers = lines
+			.next()
+			.map(|split| split.skip(1).map(|header| Currency::reverse_lookup(h).map_or(None, Some)))
+			.ok_or_else(|| Error::csv_row_missing("headers"))?;
 
-		Ok(lines.fold(BTreeMap::new(), |mut m, values| {
-			let (date, rates) = headers.iter().zip(values).fold(
+		Ok(lines.fold(BTreeMap::new(), |mut m, mut values| {
+			let date =
+				values.next().and_then(|d| d.parse::<NaiveDate>().ok()).or_else(NaiveDate::default);
+
+			let rates = headers.zip(values).fold(
 				(NaiveDate::default(), ExchangeRates(HashMap::new())),
-				|(mut date, mut rates), (header, value)| {
-					match header
+				|(mut rates), (header, value)| {
+					if let Some(Ok(c)) = header
+					// TODO: if-let chain
 					{
-						Heading::Currency(c) =>
+						if let Ok(d) = value.parse::<Decimal>()
 						{
-							if let Ok(d) = value.parse::<Decimal>()
-							{
-								rates.0.insert(*c, d);
-							}
-						},
-						Heading::Date =>
-						{
-							if let Ok(d) = value.parse::<NaiveDate>()
-							{
-								date = d;
-							}
-						},
-						Heading::Invalid => (),
-					};
+							rates.0.insert(*c, d);
+						}
+					}
 
-					(date, rates)
+					(rates)
 				},
 			);
 
@@ -242,15 +223,28 @@ mod tests
 	#[tokio::test]
 	async fn get() -> Result<()>
 	{
-		let first =
+		let mut after =
 			HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(1999, 01, 04).and_then(|d| {
 				d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
 			}))
 			.await?;
 
-
-		let before =
+		let mut before =
 			HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(1998, 01, 01).and_then(|d| {
+				d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
+			}))
+			.await?;
+
+		assert!(after.is_some());
+		assert_eq!(after, before);
+
+		first = HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(2012, 05, 05).and_then(|d| {
+			d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
+		}))
+		.await?;
+
+		before =
+			HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(2012, 05, 04).and_then(|d| {
 				d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
 			}))
 			.await?;
