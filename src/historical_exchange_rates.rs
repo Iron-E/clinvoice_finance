@@ -4,19 +4,14 @@ use std::{
 };
 
 use chrono::{DateTime, Duration, Local, NaiveDate};
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::{OnceCell, RwLock, RwLockReadGuard};
 
-use crate::{request, Currency, Decimal, Error, ExchangeRates, Result};
+use crate::{request, Currency, Decimal, Error, Exchange, ExchangeRates, Result};
 
 /// A collection of rates of exchange between currencies such that some `amount` of
 /// [`Money`](crate::Money) divided by its [`Currency`] will yield [`Currency::Eur`], and an
 /// `amount` of [`Currency::Eur`] multiplied by any [`Currency`]'s exchange rate will yield that
 /// [`Currency`].
-///
-/// # See also
-///
-/// * [`ExchangeRates::get`], to get the corresponding rate for some [`Currency`].
-/// * [`ExchangeRates::new`], to create new [`ExchangeRates`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct HistoricalExchangeRates;
 
@@ -60,6 +55,92 @@ impl HistoricalExchangeRates
 		Ok(cached)
 	}
 
+	/// Like [`HistoricalExchangeRates::try_exchange`] but panics when it would return [`Err`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::try_exchange`] would return [`Err`].
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::exchange_from`]
+	pub async fn exchange<E>(
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> E
+	where
+		E: Exchange,
+	{
+		Self::try_exchange(date, currency, exchangeable).await.unwrap()
+	}
+
+	/// Like [`HistoricalExchangeMap::exchange_opt_from`] but panics when it would return [`None`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeMap::exchange_opt_from`] would return [`None`].
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::exchange`]
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub fn exchange_from<E>(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> E
+	where
+		E: Exchange,
+	{
+		Self::exchange_opt_from(history, date, currency, exchangeable).unwrap()
+	}
+
+	/// Like [`HistoricalExchangeRates::try_exchange_opt`] but panics when it would return [`Err`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::try_exchange_opt`] would return [`Err`].
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::try_exchange`]
+	pub async fn exchange_opt<E>(
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> Option<E>
+	where
+		E: Exchange,
+	{
+		Self::try_exchange_opt(date, currency, exchangeable).await.unwrap()
+	}
+
+	/// [`Exchange`] the `exchangeable` value into the given `currency` using the rates as they were
+	/// on the given `day` in the `history`. Returns [`None`] the `date` could not be found in the
+	/// source of `history`.
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::exchange_opt`]
+	/// * [`HistoricalExchangeRates::get_ref_from`] for a breakdown of how the history is searched
+	///   for `date`.
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub fn exchange_opt_from<E>(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> Option<E>
+	where
+		E: Exchange,
+	{
+		Self::get_ref_from(&history, date).map(|rates| exchangeable.exchange(currency, rates))
+	}
+
 	/// Download the latest historical record of exchange rate data from the [ECB][ecb] and parse it
 	/// into a [`HistoricalExchangeMap`].
 	///
@@ -78,24 +159,64 @@ impl HistoricalExchangeRates
 	/// Returns an [`Err`] if something went wrong retrieving the historical
 	/// data, otherwise [`Ok(Some(rates))`] or [`Ok(None)`] to indicate the presence or absence of
 	/// the rates in the historical record.
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::get_from`]
 	pub async fn get(date: Option<DateTime<Local>>) -> Result<Option<ExchangeRates>>
 	{
-		let cached = Self::cached().await?;
-		let history = cached.read().await;
+		let history = Self::history().await?;
 		Ok(Self::get_from(&history, date))
+	}
+
+	/// Like [`HistoricalExchangeRates::get_ref_from`] but return and owned value.
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::get`]
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub fn get_from(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+	) -> Option<ExchangeRates>
+	{
+		Self::get_ref_from(history, date).cloned()
 	}
 
 	/// Retrieve the [`ExchangeRates`] from the given `date` (or the nearest-available date;
 	/// today if [`None`]). Returns [`Some(rates)`] or [`None`] to indicate the presence or absence
 	/// of the rates in the historical record.
-	pub fn get_from(history: &HistoricalExchangeMap, date: Option<DateTime<Local>>) -> Option<ExchangeRates>
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub fn get_ref_from(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+	) -> Option<&ExchangeRates>
 	{
 		let naive = date.map_or_else(local_now, |d| d.naive_local().date());
 		history
 			.range(..=naive)
 			.next_back()
 			.or_else(|| history.range(naive..).next())
-			.map(|(_, rates)| rates.clone())
+			.map(|(_, rates)| rates)
+	}
+
+	/// Obtain a read-only copy of the automatically-managed exchange rate history. Useful for
+	/// pulling asynchrony out from a loop, and then passing the value manually to
+	/// [`ExchangeRates::get_ref_from`].
+	///
+	/// # Warnings
+	///
+	/// * While the return value is in scope, the [`HistoricalExchangeRates`] cannot update itself!
+	///   **This may cause other operations to lock until this value is released**.
+	pub async fn history() -> Result<RwLockReadGuard<'static, HistoricalExchangeMap>>
+	{
+		let cached = Self::cached().await?;
+		Ok(cached.read().await)
 	}
 
 	/// Like [`HistoricalExchangeRates::try_index`] but panics if it returns [`Err`].
@@ -103,6 +224,10 @@ impl HistoricalExchangeRates
 	/// # Panics
 	///
 	/// * When [`HistoricalExchangeRates::try_index`] returns [`Err`].
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::index_from`]
 	pub async fn index(date: Option<DateTime<Local>>) -> ExchangeRates
 	{
 		Self::try_index(date).await.unwrap()
@@ -113,7 +238,15 @@ impl HistoricalExchangeRates
 	/// # Panics
 	///
 	/// * When [`HistoricalExchangeRates::get_from`] return [`None`].
-	pub async fn index_from(history: &HistoricalExchangeMap, date: Option<DateTime<Local>>) -> ExchangeRates
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub async fn index_from(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+	) -> ExchangeRates
 	{
 		Self::get_from(history, date).unwrap()
 	}
@@ -162,12 +295,51 @@ impl HistoricalExchangeRates
 				},
 			);
 
-			// NOTE: conversion to EUR is not stored in ECB exchange rates, since the rates are given in
-			//       context of EUR to some other currency.
+			// NOTE: conversion to EUR is not stored in ECB exchange rates, since the rates are
+			// given in       context of EUR to some other currency.
 			rates.0.insert(Currency::Eur, 1.into());
 			m.insert(date, rates);
 			m
 		}))
+	}
+
+	/// Like [`HistoricalExchangeRates::try_exchange_opt`] but panics when it would return
+	/// [`Ok(None)`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::try_exchange_opt`] would return [`Ok(None)`].
+	pub async fn try_exchange<E>(
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> Result<E>
+	where
+		E: Exchange,
+	{
+		Self::try_exchange_opt(date, currency, exchangeable).await.map(Option::unwrap)
+	}
+
+	/// Like [`HistoricalExchangeRates::exchange_from`], but attempt to use the internally-managed
+	/// source of `history`. Will only return [`Err`] when this internal management fails.
+	/// Otherwise, [`Ok(Some)`] or [`Ok(None)`] is returned depending on whether `date` can be found
+	/// in the record.
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::exchange_opt`]
+	/// * [`HistoricalExchangeRates::get_ref_from`] for a breakdown of how the history is searched
+	///   for `date`.
+	pub async fn try_exchange_opt<E>(
+		date: Option<DateTime<Local>>,
+		currency: Currency,
+		exchangeable: E,
+	) -> Result<Option<E>>
+	where
+		E: Exchange,
+	{
+		let history = Self::history().await?;
+		Ok(Self::exchange_opt_from(&history, date, currency, exchangeable))
 	}
 
 	/// Like [`HistoricalExchangeRates::get`] but panics if it returns [`Ok(None)`].
@@ -177,13 +349,17 @@ impl HistoricalExchangeRates
 	/// * When [`HistoricalExchangeRates::get`] return [`Ok(None)`].
 	pub async fn try_index(date: Option<DateTime<Local>>) -> Result<ExchangeRates>
 	{
-		Self::get(date).await.map(|rates| rates.expect("The internal historical record has no data"))
+		Self::get(date)
+			.await
+			.map(|rates| rates.expect("The internal historical record has no data"))
 	}
 }
 
 #[cfg(test)]
 mod tests
 {
+	use pretty_assertions::assert_eq;
+
 	use super::{
 		Currency,
 		Decimal,
@@ -193,6 +369,7 @@ mod tests
 		NaiveDate,
 		Result,
 	};
+	use crate::Money;
 
 	#[tokio::test]
 	async fn cached() -> Result<()>
@@ -266,6 +443,20 @@ mod tests
 		assert!(after.is_some());
 		assert_eq!(after, before);
 
+		Ok(())
+	}
+
+	#[tokio::test]
+	async fn exchange() -> Result<()>
+	{
+		let value = HistoricalExchangeRates::exchange(
+			None,
+			Default::default(),
+			Money::new(20_00, 2, Currency::Usd),
+		)
+		.await;
+
+		assert_eq!(value, Money::new(18_69, 2, Default::default()));
 		Ok(())
 	}
 }
