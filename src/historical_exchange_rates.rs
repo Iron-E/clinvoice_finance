@@ -4,7 +4,6 @@ use std::{
 };
 
 use chrono::{DateTime, Duration, Local, NaiveDate};
-use heading::Heading;
 use tokio::sync::{OnceCell, RwLock};
 
 use crate::{request, Currency, Decimal, Error, ExchangeRates, Result};
@@ -137,20 +136,22 @@ impl HistoricalExchangeRates
 	pub fn parse_csv(csv: &str) -> Result<HistoricalExchangeMap>
 	{
 		let mut lines = csv.lines().map(|line| line.split(','));
-		let headers = lines
+		let headers: Vec<_> = lines
 			.next()
-			.map(|split| split.skip(1).map(|header| Currency::reverse_lookup(h).map_or(None, Some)))
+			.map(|split| split.skip(1).map(|h| Currency::reverse_lookup(h).map_or(None, Some)).collect())
 			.ok_or_else(|| Error::csv_row_missing("headers"))?;
 
 		Ok(lines.fold(BTreeMap::new(), |mut m, mut values| {
-			let date =
-				values.next().and_then(|d| d.parse::<NaiveDate>().ok()).or_else(NaiveDate::default);
+			let date = values
+				.next()
+				.and_then(|d| d.parse::<NaiveDate>().ok())
+				.unwrap_or_else(NaiveDate::default);
 
-			let rates = headers.zip(values).fold(
-				(NaiveDate::default(), ExchangeRates(HashMap::new())),
-				|(mut rates), (header, value)| {
-					if let Some(Ok(c)) = header
+			let rates = headers.iter().zip(values).fold(
+				ExchangeRates(HashMap::new()),
+				|mut rates, (header, value)| {
 					// TODO: if-let chain
+					if let Some(c) = header
 					{
 						if let Ok(d) = value.parse::<Decimal>()
 						{
@@ -158,7 +159,7 @@ impl HistoricalExchangeRates
 						}
 					}
 
-					(rates)
+					rates
 				},
 			);
 
@@ -238,7 +239,7 @@ mod tests
 		assert!(after.is_some());
 		assert_eq!(after, before);
 
-		first = HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(2012, 05, 05).and_then(|d| {
+		after = HistoricalExchangeRates::get(NaiveDate::from_ymd_opt(2012, 05, 05).and_then(|d| {
 			d.and_hms_opt(0, 0, 0).and_then(|dt| dt.and_local_timezone(Local).earliest())
 		}))
 		.await?;
@@ -249,8 +250,8 @@ mod tests
 			}))
 			.await?;
 
-		assert!(first.is_some());
-		assert_eq!(first, before);
+		assert!(after.is_some());
+		assert_eq!(after, before);
 
 		Ok(())
 	}
