@@ -138,7 +138,7 @@ impl HistoricalExchangeRates
 	where
 		E: Exchange,
 	{
-		Self::get_ref_from(&history, date).map(|rates| exchangeable.exchange(currency, rates))
+		Self::get_ref_from(history, date).map(|rates| exchangeable.exchange(currency, rates))
 	}
 
 	/// Download the latest historical record of exchange rate data from the [ECB][ecb] and parse it
@@ -243,7 +243,7 @@ impl HistoricalExchangeRates
 	///
 	/// * [`HistoricalExchangeRates::history`]
 	/// * [`HistoricalExchangeRates::parse_csv`]
-	pub async fn index_from(
+	pub fn index_from(
 		history: &HistoricalExchangeMap,
 		date: Option<DateTime<Local>>,
 	) -> ExchangeRates
