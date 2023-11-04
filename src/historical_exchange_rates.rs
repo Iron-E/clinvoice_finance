@@ -248,7 +248,25 @@ impl HistoricalExchangeRates
 		date: Option<DateTime<Local>>,
 	) -> ExchangeRates
 	{
-		Self::get_from(history, date).unwrap()
+		Self::index_ref_from(history, date).clone()
+	}
+
+	/// Like [`HistoricalExchangeRates::get_ref_from`] but panics if it returns [`None`].
+	///
+	/// # Panics
+	///
+	/// * When [`HistoricalExchangeRates::get_ref_from`] return [`None`].
+	///
+	/// # See also
+	///
+	/// * [`HistoricalExchangeRates::history`]
+	/// * [`HistoricalExchangeRates::parse_csv`]
+	pub fn index_ref_from(
+		history: &HistoricalExchangeMap,
+		date: Option<DateTime<Local>>,
+	) -> &ExchangeRates
+	{
+		Self::get_ref_from(history, date).unwrap()
 	}
 
 	/// Parse a CSV of the form:
